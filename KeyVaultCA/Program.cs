@@ -6,7 +6,13 @@ namespace KeyVaultCA
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            var keyVaultServiceClient = new KeyVaultServiceClient("todo");
+            keyVaultServiceClient.SetAuthenticationClientCredential("todo", "todo");
+
+            var kvCertProvider = new KeyVaultCertificateProvider("todo", keyVaultServiceClient);
+            var cert = kvCertProvider.SigningRequestAsync(null).Result;
+
+            //TODO
         }
     }
 }
