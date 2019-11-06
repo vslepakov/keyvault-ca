@@ -28,10 +28,10 @@ namespace KeyVaultCA
                 var publicKey = KeyVaultCertFactory.GetRSAPublicKey(info.SubjectPublicKeyInfo);
                 return await KeyVaultCertFactory.CreateSignedCertificate(
                     info.Subject.ToString(),
-                    Configuration.DefaultCertificateKeySize,
+                    2048,
                     notBefore,
-                    notBefore.AddMonths(Configuration.DefaultCertificateLifetime),
-                    Configuration.DefaultCertificateHashSize,
+                    notBefore.AddMonths(12),
+                    256,
                     signingCert,
                     publicKey,
                     new KeyVaultSignatureGenerator(_keyVaultServiceClient, _caCertKeyIdentifier, signingCert),
