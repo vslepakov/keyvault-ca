@@ -3,16 +3,11 @@
 //  Licensed under the MIT License (MIT). See License.txt in the repo root for license information.
 // ------------------------------------------------------------
 
-using Org.BouncyCastle.Asn1;
 using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Net;
 using System.Security.Cryptography.Asn1;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace KeyVaultCA
@@ -79,10 +74,6 @@ namespace KeyVaultCA
                     new OidCollection {
                         new Oid("1.3.6.1.5.5.7.3.1"),
                         new Oid("1.3.6.1.5.5.7.3.2") }, true));
-
-            // Subject Alternative Name
-            //var subjectAltName = BuildSubjectAlternativeName(applicationUri, domainNames);
-            //request.CertificateExtensions.Add(new X509Extension(subjectAltName, false));
 
             if (notAfter > issuerCAKeyCert.NotAfter)
             {

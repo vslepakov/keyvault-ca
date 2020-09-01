@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 
 namespace KeyVaultCA
 {
@@ -6,13 +7,17 @@ namespace KeyVaultCA
     {
         static void Main(string[] args)
         {
-            var keyVaultServiceClient = new KeyVaultServiceClient("todo");
-            keyVaultServiceClient.SetAuthenticationClientCredential("todo", "todo");
+            var keyVaultServiceClient = new KeyVaultServiceClient("https://my-kv.vault.azure.net/");
 
-            var kvCertProvider = new KeyVaultCertificateProvider("todo", keyVaultServiceClient);
-            var cert = kvCertProvider.SigningRequestAsync(null).Result;
+            var appId = Environment.GetEnvironmentVariable("APP_ID");
+            var appSecret = Environment.GetEnvironmentVariable("APP_SECRET");
+            keyVaultServiceClient.SetAuthenticationClientCredential(appId, appSecret);
 
-            //TODO
+            var kvCertProvider = new KeyVaultCertificateProvider("DeviceRootCA", keyVaultServiceClient);
+            var csr = File.ReadAllBytes("my-test-device-csr.der");
+            var cert = kvCertProvider.SigningRequestAsync(csr).Result;
+
+            File.WriteAllBytes("cert.cer", cert.Export(System.Security.Cryptography.X509Certificates.X509ContentType.Cert));
         }
     }
 }
