@@ -10,13 +10,13 @@ Clone this repo and then ```cd KeyVaultCA```
 ## Prerequisites
 
 1. Create Azure KeyVault:  
-```az keyvault create --name my-keyvault-ca \```  
+```az keyvault create --name <KEYVAULT_NAME> \```  
 ```--resource-group keyvault-ca \```  
 ```--enable-soft-delete=true \```  
 ```--enable-purge-protection=true```  
 
 2. Let KeyVault generate an issuing certificate using the specified policy:  
-```az keyvault certificate create --vault-name my-keyvault-ca -n ContosoRootCA -p @kv-certPolicy.json```
+```az keyvault certificate create --vault-name <KEYVAULT_NAME> -n ContosoRootCA -p @kv-certPolicy.json```
 
 ## Setup KeyVault access for the API façade
 
@@ -25,7 +25,7 @@ Clone this repo and then ```cd KeyVaultCA```
 You will get an output containing ```appId``` and ```password```, please note them for later.
 
 2. Give the Service Principal accesss to KeyVault keys and certificates:  
-```az keyvault set-policy --name my-keyvault-ca \```  
+```az keyvault set-policy --name <KEYVAULT_NAME> \```  
 ```--spn <your appId> \```  
 ```--key-permissions sign \```  
 ``` --certificate-permissions get list```  
@@ -42,4 +42,4 @@ You will get an output containing ```appId``` and ```password```, please note th
 3. Run the API Facade and pass all required arguments:   
 ```dotnet run --appId <YOUR_APPID> --secret <YOUR_APP_SECRET> \```  
 ```--issuer ContosoRootCA --csrPath <PATH_TO_CSR_IN_DER_FORMAT> \```  
-```--output <OUTPUT_CERTIFICATE_FILENAME> --kvName my-keyvault-ca```
+```--output <OUTPUT_CERTIFICATE_FILENAME> --kvName <KEYVAULT_NAME>```
