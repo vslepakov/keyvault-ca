@@ -27,7 +27,7 @@ You will get an output containing ```appId``` and ```password```, please note th
 2. Give the Service Principal accesss to KeyVault keys and certificates:  
 ```az keyvault set-policy --name my-keyvault-ca \```  
 ```--spn <your appId> \```  
-```--key-permissions get list sign \```  
+```--key-permissions sign \```  
 ``` --certificate-permissions get list```  
 
 ## Request a new device certificate
