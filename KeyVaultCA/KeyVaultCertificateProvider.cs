@@ -1,5 +1,7 @@
-﻿using Org.BouncyCastle.Pkcs;
+﻿using Microsoft.Azure.KeyVault.Models;
+using Org.BouncyCastle.Pkcs;
 using System;
+using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 
@@ -8,18 +10,33 @@ namespace KeyVaultCA
     internal class KeyVaultCertificateProvider
     {
         private readonly KeyVaultServiceClient _keyVaultServiceClient;
-        private readonly string _certificateName;
 
-        internal KeyVaultCertificateProvider(string certificateName, KeyVaultServiceClient keyVaultServiceClient)
+        internal KeyVaultCertificateProvider(KeyVaultServiceClient keyVaultServiceClient)
         {
             _keyVaultServiceClient = keyVaultServiceClient;
-            _certificateName = certificateName;
+        }
+
+        public async Task CreateCACertificateAsync(string issuerCertificateName, string subject)
+        {
+            var certVersions = await _keyVaultServiceClient.GetCertificateVersionsAsync(issuerCertificateName).ConfigureAwait(false);
+
+            if (!certVersions.Any())
+            {
+                var notBefore = DateTime.UtcNow.AddDays(-1);
+                await _keyVaultServiceClient.CreateCACertificateAsync(
+                        issuerCertificateName,
+                        subject,
+                        notBefore,
+                        notBefore.AddMonths(48), 
+                        4096, 
+                        256);
+            }
         }
 
         /// <summary>
         /// Creates a KeyVault signed certficate from signing request.
         /// </summary>
-        internal async Task<X509Certificate2> SigningRequestAsync(byte[] certificateRequest)
+        internal async Task<X509Certificate2> SigningRequestAsync(byte[] certificateRequest, string issuerCertificateName)
         {
             var pkcs10CertificationRequest = new Pkcs10CertificationRequest(certificateRequest);
             if (!pkcs10CertificationRequest.Verify())
@@ -30,7 +47,7 @@ namespace KeyVaultCA
             var info = pkcs10CertificationRequest.GetCertificationRequestInfo();
             var notBefore = DateTime.UtcNow.AddDays(-1);
 
-            var certBundle = await _keyVaultServiceClient.GetCertificateAsync(_certificateName).ConfigureAwait(false);
+            var certBundle = await _keyVaultServiceClient.GetCertificateAsync(issuerCertificateName).ConfigureAwait(false);
 
             var signingCert = new X509Certificate2(certBundle.Cer);
             var publicKey = KeyVaultCertFactory.GetRSAPublicKey(info.SubjectPublicKeyInfo);

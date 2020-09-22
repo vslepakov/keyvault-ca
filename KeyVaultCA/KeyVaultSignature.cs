@@ -29,8 +29,8 @@ namespace KeyVaultCA
             ushort hashSizeInBits,
             X509Certificate2 issuerCAKeyCert,
             RSA publicKey,
-            X509SignatureGenerator generator
-            )
+            X509SignatureGenerator generator,
+            bool caCert = false)
         {
             if (publicKey == null)
             {
@@ -47,10 +47,12 @@ namespace KeyVaultCA
             RandomNumberGenerator.Fill(serialNumber);
             serialNumber[0] &= 0x7F;
 
-            var request = new CertificateRequest(subjectName, publicKey, GetRSAHashAlgorithmName(hashSizeInBits), RSASignaturePadding.Pkcs1);
+            var subjectDN = new X500DistinguishedName(subjectName);
+            var request = new CertificateRequest(subjectDN, publicKey, GetRSAHashAlgorithmName(hashSizeInBits), RSASignaturePadding.Pkcs1);
 
             // Basic constraints
-            request.CertificateExtensions.Add(new X509BasicConstraintsExtension(false, false, 0, true));
+            request.CertificateExtensions.Add(
+                new X509BasicConstraintsExtension(caCert, caCert, 0, true));
 
             // Subject Key Identifier
             var ski = new X509SubjectKeyIdentifierExtension(
@@ -59,33 +61,56 @@ namespace KeyVaultCA
                 false);
 
             request.CertificateExtensions.Add(ski);
-            request.CertificateExtensions.Add(BuildAuthorityKeyIdentifier(issuerCAKeyCert));
 
-            // Key Usage
-            X509KeyUsageFlags defaultFlags =
-                X509KeyUsageFlags.DigitalSignature | X509KeyUsageFlags.DataEncipherment |
-                    X509KeyUsageFlags.NonRepudiation | X509KeyUsageFlags.KeyEncipherment;
+            // Authority Key Identifier
+            if (issuerCAKeyCert != null)
+            {
+                request.CertificateExtensions.Add(BuildAuthorityKeyIdentifier(issuerCAKeyCert));
+            }
+            else
+            {
+                request.CertificateExtensions.Add(BuildAuthorityKeyIdentifier(subjectDN, serialNumber.Reverse().ToArray(), ski));
+            }
 
-            request.CertificateExtensions.Add(new X509KeyUsageExtension(defaultFlags, true));
+            if (caCert)
+            {
+                request.CertificateExtensions.Add(
+                    new X509KeyUsageExtension(
+                        X509KeyUsageFlags.DigitalSignature | X509KeyUsageFlags.KeyCertSign | X509KeyUsageFlags.CrlSign,
+                        true));
+            }
+            else
+            {
+                // Key Usage
+                X509KeyUsageFlags defaultFlags =
+                    X509KeyUsageFlags.DigitalSignature | X509KeyUsageFlags.DataEncipherment |
+                        X509KeyUsageFlags.NonRepudiation | X509KeyUsageFlags.KeyEncipherment;
 
-            // Enhanced key usage
-            request.CertificateExtensions.Add(
-                new X509EnhancedKeyUsageExtension(
-                    new OidCollection {
+                request.CertificateExtensions.Add(new X509KeyUsageExtension(defaultFlags, true));
+
+                // Enhanced key usage
+                request.CertificateExtensions.Add(
+                    new X509EnhancedKeyUsageExtension(
+                        new OidCollection {
                         new Oid("1.3.6.1.5.5.7.3.1"),
                         new Oid("1.3.6.1.5.5.7.3.2") }, true));
-
-            if (notAfter > issuerCAKeyCert.NotAfter)
-            {
-                notAfter = issuerCAKeyCert.NotAfter;
-            }
-            if (notBefore < issuerCAKeyCert.NotBefore)
-            {
-                notBefore = issuerCAKeyCert.NotBefore;
             }
 
+            if (issuerCAKeyCert != null)
+            {
+                if (notAfter > issuerCAKeyCert.NotAfter)
+                {
+                    notAfter = issuerCAKeyCert.NotAfter;
+                }
+                if (notBefore < issuerCAKeyCert.NotBefore)
+                {
+                    notBefore = issuerCAKeyCert.NotBefore;
+                }
+            }
+
+            var issuerSubjectName = issuerCAKeyCert != null ? issuerCAKeyCert.SubjectName : subjectDN;
             X509Certificate2 signedCert = request.Create(
-                issuerCAKeyCert.SubjectName,
+                issuerSubjectName,
                 generator,
                 notBefore,
                 notAfter,

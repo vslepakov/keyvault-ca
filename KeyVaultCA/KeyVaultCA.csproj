@@ -14,10 +14,4 @@
     <PackageReference Include="Portable.BouncyCastle" Version="1.8.5.2" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Update="kv-certPolicy.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
 </Project>
