@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29311.281
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KeyVaultCA", "KeyVaultCA\KeyVaultCA.csproj", "{58506996-84F8-46D7-BCE4-DD3229C2DD5A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KeyVaultCA", "KeyVaultCA\KeyVaultCA.csproj", "{58506996-84F8-46D7-BCE4-DD3229C2DD5A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KeyVaultCa.Core", "KeyVaultCa.Core\KeyVaultCa.Core.csproj", "{8471E7FB-D037-4D90-80F6-19FC85DC3CFF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{58506996-84F8-46D7-BCE4-DD3229C2DD5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{58506996-84F8-46D7-BCE4-DD3229C2DD5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{58506996-84F8-46D7-BCE4-DD3229C2DD5A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8471E7FB-D037-4D90-80F6-19FC85DC3CFF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8471E7FB-D037-4D90-80F6-19FC85DC3CFF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8471E7FB-D037-4D90-80F6-19FC85DC3CFF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8471E7FB-D037-4D90-80F6-19FC85DC3CFF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
