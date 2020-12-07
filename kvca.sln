@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KeyVaultCA", "KeyVaultCA\Ke
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KeyVaultCa.Core", "KeyVaultCa.Core\KeyVaultCa.Core.csproj", "{8471E7FB-D037-4D90-80F6-19FC85DC3CFF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KeyVaultCA.Web", "KeyVaultCA.Web\KeyVaultCA.Web.csproj", "{76C9D81E-AC47-4BB8-8577-C94F2C5286D9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{8471E7FB-D037-4D90-80F6-19FC85DC3CFF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8471E7FB-D037-4D90-80F6-19FC85DC3CFF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8471E7FB-D037-4D90-80F6-19FC85DC3CFF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{76C9D81E-AC47-4BB8-8577-C94F2C5286D9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{76C9D81E-AC47-4BB8-8577-C94F2C5286D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{76C9D81E-AC47-4BB8-8577-C94F2C5286D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{76C9D81E-AC47-4BB8-8577-C94F2C5286D9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
