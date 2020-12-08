@@ -1,5 +1,4 @@
-﻿using Microsoft.Azure.KeyVault.Models;
-using Org.BouncyCastle.Pkcs;
+﻿using Org.BouncyCastle.Pkcs;
 using System;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
@@ -7,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace KeyVaultCa.Core
 {
-    public class KeyVaultCertificateProvider
+    public class KeyVaultCertificateProvider : IKeyVaultCertificateProvider
     {
         private readonly KeyVaultServiceClient _keyVaultServiceClient;
 
@@ -31,6 +30,12 @@ namespace KeyVaultCa.Core
                         4096, 
                         256);
             }
+        }
+
+        public async Task<X509Certificate2> GetCertificateAsync(string issuerCertificateName)
+        {
+            var certBundle = await _keyVaultServiceClient.GetCertificateAsync(issuerCertificateName).ConfigureAwait(false);
+            return new X509Certificate2(certBundle.Cer);
         }
 
         /// <summary>

@@ -1,3 +1,4 @@
+using KeyVaultCa.Core;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -25,8 +26,16 @@ namespace KeyVaultCA.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var caConfig = new CAConfuguration();
+
+            var keyVaultServiceClient = new KeyVaultServiceClient($"https://{caConfig.KeyVaultName}.vault.azure.net/");
+            keyVaultServiceClient.SetAuthenticationClientCredential(caConfig.AppId, caConfig.Secret);
+            var kvCertProvider = new KeyVaultCertificateProvider(keyVaultServiceClient);
 
             services.AddControllers();
+            services.AddSingleton<IKeyVaultCertificateProvider>(kvCertProvider);
+            services.AddSingleton(caConfig);
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "KeyVaultCA.Web", Version = "v1" });
