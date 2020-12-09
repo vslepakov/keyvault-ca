@@ -5,10 +5,10 @@ namespace KeyVaultCa.Core
 {
     public interface IKeyVaultCertificateProvider
     {
-        Task CreateCACertificateAsync(string issuerCertificateName, string subject);
+        Task CreateCACertificateAsync(string issuerCertificateName, string subject, int pathLengthConstraint);
 
         Task<X509Certificate2> GetCertificateAsync(string issuerCertificateName);
 
-        Task<X509Certificate2> SigningRequestAsync(byte[] certificateRequest, string issuerCertificateName);
+        Task<X509Certificate2> SigningRequestAsync(byte[] certificateRequest, string issuerCertificateName, bool isIntermediateCA, int pathLengthConstraint);
     }
 }

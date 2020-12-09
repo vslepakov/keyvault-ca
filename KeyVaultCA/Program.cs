@@ -34,6 +34,12 @@ namespace KeyVaultCA
             [Option("output", Required = false, HelpText = "Output file name for the certificate")]
             public string OutputFileName { get; set; }
 
+            [Option("intermediate", Required = false, HelpText = "Is the certificate allowed to act as an intermediate certificate authority")]
+            public bool IsIntermediateCA { get; set; }
+
+            [Option("maxPathLength", Required = false, HelpText = "Maximum number of intermediate certificates that can follow this certificate")]
+            public int PathLengthConstraint { get; set; }
+
             // Options for Root CA creation
 
             [Option("ca", Required = false, HelpText = "Should register Root CA")]
@@ -66,7 +72,7 @@ namespace KeyVaultCA
                 }
                     
                 // Generate issuing certificate in KeyVault
-                await kvCertProvider.CreateCACertificateAsync(o.IssuerCertName, o.Subject);
+                await kvCertProvider.CreateCACertificateAsync(o.IssuerCertName, o.Subject, o.PathLengthConstraint);
             }
             else
             {
@@ -75,9 +81,9 @@ namespace KeyVaultCA
                     throw new ArgumentException("Path to CSR or the Output Filename is not provided.");
                 }
 
-                // Issue device certificate
+                // Issue device certificate or intermediate certificate
                 var csr = File.ReadAllBytes(o.PathToCsr);
-                var cert = await kvCertProvider.SigningRequestAsync(csr, o.IssuerCertName);
+                var cert = await kvCertProvider.SigningRequestAsync(csr, o.IssuerCertName, o.IsIntermediateCA, o.PathLengthConstraint);
 
                 File.WriteAllBytes(o.OutputFileName, cert.Export(System.Security.Cryptography.X509Certificates.X509ContentType.Cert));
             }

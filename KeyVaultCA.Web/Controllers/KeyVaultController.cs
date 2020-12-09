@@ -45,7 +45,8 @@ namespace KeyVaultCA.Web.Controllers
         [Route("enroll")]
         public async Task<byte[]> Enroll(byte[] certificateRequest, string issuerCertificateName)
         {
-            var cert = await _keyVaultCertProvider.SigningRequestAsync(certificateRequest, issuerCertificateName);
+            var cert = await _keyVaultCertProvider.SigningRequestAsync(certificateRequest, issuerCertificateName,
+                isIntermediateCA: false, pathLengthConstraint: 0);
             return cert.Export(X509ContentType.Cert);
         }
 

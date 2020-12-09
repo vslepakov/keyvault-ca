@@ -49,6 +49,7 @@ namespace KeyVaultCa.Core
                 DateTime notAfter,
                 int keySize,
                 int hashSize,
+                int pathLengthConstraint,
                 CancellationToken ct = default)
         {
             try
@@ -136,7 +137,8 @@ namespace KeyVaultCa.Core
                     null,
                     publicKey,
                     new KeyVaultSignatureGenerator(this, createdCertificateBundle.KeyIdentifier.Identifier, null),
-                    true);
+                    caCert: true,
+                    pathLengthConstraint: pathLengthConstraint);
 
                 // merge Root CA cert with
                 var mergeResult = await _keyVaultClient.MergeCertificateAsync(

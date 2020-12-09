@@ -30,7 +30,9 @@ namespace KeyVaultCa.Core
             X509Certificate2 issuerCAKeyCert,
             RSA publicKey,
             X509SignatureGenerator generator,
-            bool caCert = false)
+            bool caCert = false,
+            bool intermediateCACert = false,
+            int pathLengthConstraint = 0)
         {
             if (publicKey == null)
             {
@@ -52,7 +54,11 @@ namespace KeyVaultCa.Core
 
             // Basic constraints
             request.CertificateExtensions.Add(
-                new X509BasicConstraintsExtension(caCert, caCert, 0, true));
+                new X509BasicConstraintsExtension(
+                    certificateAuthority: caCert || intermediateCACert,
+                    hasPathLengthConstraint: caCert || intermediateCACert,
+                    pathLengthConstraint: pathLengthConstraint,
+                    true));
 
             // Subject Key Identifier
             var ski = new X509SubjectKeyIdentifierExtension(
@@ -72,7 +78,7 @@ namespace KeyVaultCa.Core
                 request.CertificateExtensions.Add(BuildAuthorityKeyIdentifier(subjectDN, serialNumber.Reverse().ToArray(), ski));
             }
 
-            if (caCert)
+            if (caCert || intermediateCACert)
             {
                 request.CertificateExtensions.Add(
                     new X509KeyUsageExtension(

@@ -47,3 +47,23 @@ You will get an output containing ```appId``` and ```password```, please note th
 ```dotnet run --appId <YOUR_APPID> --secret <YOUR_APP_SECRET> \```  
 ```--issuercert ContosoRootCA --csrPath <PATH_TO_CSR_IN_DER_FORMAT> \```  
 ```--output <OUTPUT_CERTIFICATE_FILENAME> --kvName <KEYVAULT_NAME>```
+
+## Generate a Root CA and Intermediate CA in KeyVault
+
+1. Run the API Facade like this (`maxPathLength` specifies the number of intermediate CAs allowed in a device certificate's chain):  
+```dotnet run --appId <YOUR_APPID> --secret <YOUR_APP_SECRET> \```  
+```--ca --subject="C=US, ST=WA, L=Redmond, O=Contoso, OU=Contoso HR, CN=Contoso Inc" \```  
+```--maxPathLength 1 --issuercert ContosoRootCA --kvName <KEYVAULT_NAME>```
+
+2. Generate the private key for the intermediate CA:  
+```openssl genrsa -out myintermediateca.key 2048```  
+
+3. Create the CSR:  
+```openssl req -new -key myintermediateca.key -out myintermediateca.csr```  
+```openssl req -in myintermediateca.csr -out myintermediateca.csr.der -outform DER```
+
+4. Run the API Facade and pass all required arguments:   
+```dotnet run --appId <YOUR_APPID> --secret <YOUR_APP_SECRET> \```  
+```--intermediate --maxPathLength 0```
+```--issuercert ContosoRootCA --csrPath <PATH_TO_CSR_IN_DER_FORMAT> \```  
+```--output <OUTPUT_CERTIFICATE_FILENAME> --kvName <KEYVAULT_NAME> \```

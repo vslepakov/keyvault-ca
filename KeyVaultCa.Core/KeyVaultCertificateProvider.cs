@@ -15,7 +15,7 @@ namespace KeyVaultCa.Core
             _keyVaultServiceClient = keyVaultServiceClient;
         }
 
-        public async Task CreateCACertificateAsync(string issuerCertificateName, string subject)
+        public async Task CreateCACertificateAsync(string issuerCertificateName, string subject, int pathLengthConstraint)
         {
             var certVersions = await _keyVaultServiceClient.GetCertificateVersionsAsync(issuerCertificateName).ConfigureAwait(false);
 
@@ -28,7 +28,8 @@ namespace KeyVaultCa.Core
                         notBefore,
                         notBefore.AddMonths(48), 
                         4096, 
-                        256);
+                        256,
+                        pathLengthConstraint);
             }
         }
 
@@ -41,7 +42,8 @@ namespace KeyVaultCa.Core
         /// <summary>
         /// Creates a KeyVault signed certficate from signing request.
         /// </summary>
-        public async Task<X509Certificate2> SigningRequestAsync(byte[] certificateRequest, string issuerCertificateName)
+        public async Task<X509Certificate2> SigningRequestAsync(byte[] certificateRequest, string issuerCertificateName,
+            bool isIntermediateCA, int pathLengthConstraint)
         {
             var pkcs10CertificationRequest = new Pkcs10CertificationRequest(certificateRequest);
             if (!pkcs10CertificationRequest.Verify())
@@ -65,7 +67,10 @@ namespace KeyVaultCa.Core
                 256,
                 signingCert,
                 publicKey,
-                new KeyVaultSignatureGenerator(_keyVaultServiceClient, certBundle.KeyIdentifier.Identifier, signingCert)
+                new KeyVaultSignatureGenerator(_keyVaultServiceClient, certBundle.KeyIdentifier.Identifier, signingCert),
+                caCert: false,
+                intermediateCACert: isIntermediateCA,
+                pathLengthConstraint: pathLengthConstraint
                 );
         }
     }
