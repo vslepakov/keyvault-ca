@@ -19,27 +19,35 @@ namespace KeyVaultCa.Core
     {
         private readonly string _vaultBaseUrl;
         private IKeyVaultClient _keyVaultClient;
+        private readonly string _clientId;
         private ClientCredential _clientCredential;
 
         /// <summary>
-        /// Create the service client for KeyVault, with user or service credentials.
+        /// Create the service client for KeyVault, with service (client) credentials.
         /// </summary>
         /// <param name="vaultBaseUrl">The Url of the Key Vault.</param>
-        public KeyVaultServiceClient(string vaultBaseUrl)
+        /// <param name="appId"></param>
+        /// <param name="appSecret"></param>
+        public KeyVaultServiceClient(string vaultBaseUrl, string appId, string appSecret)
         {
             _vaultBaseUrl = vaultBaseUrl;
+            _clientId = appId;
+            _clientCredential = new ClientCredential(appId, appSecret);
+            _keyVaultClient = new KeyVaultClient(
+                new KeyVaultClient.AuthenticationCallback(GetAccessTokenUsingClientCredentialsAsync));
         }
 
         /// <summary>
-        /// Set appID and app secret for keyVault authentication.
+        /// Create the service client for KeyVault, with device authentication.
         /// </summary>
+        /// <param name="vaultBaseUrl">The Url of the Key Vault.</param>
         /// <param name="appId"></param>
-        /// <param name="appSecret"></param>
-        public void SetAuthenticationClientCredential(string appId, string appSecret)
+        public KeyVaultServiceClient(string vaultBaseUrl, string appId)
         {
-            _clientCredential = new ClientCredential(appId, appSecret);
+            _vaultBaseUrl = vaultBaseUrl;
+            _clientId = appId;
             _keyVaultClient = new KeyVaultClient(
-                new KeyVaultClient.AuthenticationCallback(GetAccessTokenAsync));
+                new KeyVaultClient.AuthenticationCallback(GetAccessTokenUsingDeviceAuthenticationAsync));
         }
 
         public async Task<X509Certificate2> CreateCACertificateAsync(
@@ -271,12 +279,40 @@ namespace KeyVaultCa.Core
         }
 
         /// <summary>
-        /// Private callback for keyvault authentication.
+        /// Private callback for keyvault authentication using client credentials.
         /// </summary>
-        private async Task<string> GetAccessTokenAsync(string authority, string resource, string scope)
+        private async Task<string> GetAccessTokenUsingClientCredentialsAsync(string authority, string resource, string scope)
         {
             var context = new AuthenticationContext(authority, TokenCache.DefaultShared);
-            var result = await context.AcquireTokenAsync(resource, _clientCredential);
+            AuthenticationResult result;
+            try
+            {
+                result = await context.AcquireTokenSilentAsync(resource, _clientId);
+            }
+            catch (AdalException)
+            {
+                result = await context.AcquireTokenAsync(resource, _clientCredential);
+            }
+            return result.AccessToken;
+        }
+
+        /// <summary>
+        /// Private callback for keyvault authentication using device authentication.
+        /// </summary>
+        private async Task<string> GetAccessTokenUsingDeviceAuthenticationAsync(string authority, string resource, string scope)
+        {
+            var context = new AuthenticationContext(authority, TokenCache.DefaultShared);
+            AuthenticationResult result;
+            try
+            {
+                result = await context.AcquireTokenSilentAsync(resource, _clientId);
+            }
+            catch (AdalException)
+            {
+                var deviceCode = await context.AcquireDeviceCodeAsync(resource, _clientId);
+                Console.WriteLine(deviceCode.Message);
+                result = await context.AcquireTokenByDeviceCodeAsync(deviceCode);
+            }
             return result.AccessToken;
         }
 

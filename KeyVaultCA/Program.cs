@@ -15,11 +15,14 @@ namespace KeyVaultCA
             [Option("appId", Required = true, HelpText = "AppId of the AAD service principal that can access KeyVault.")]
             public string AppId { get; set; }
 
-            [Option("secret", Required = true, HelpText = "Password of the AAD service principal that can access KeyVault.")]
+            [Option("secret", Required = false, HelpText = "Password of the AAD service principal that can access KeyVault.")]
             public string Secret { get; set; }
 
             [Option("kvName", Required = true, HelpText = "KeyVault name")]
             public string KeyVaultName { get; set; }
+
+            [Option("deviceAuth", Required = false, HelpText = "Use device authentication instead of client secret")]
+            public bool UseDeviceAuth { get; set; }
 
             // Certificates
 
@@ -60,8 +63,12 @@ namespace KeyVaultCA
 
         private static async Task StartAsync(Options o)
         {
-            var keyVaultServiceClient = new KeyVaultServiceClient($"https://{o.KeyVaultName}.vault.azure.net/");
-            keyVaultServiceClient.SetAuthenticationClientCredential(o.AppId, o.Secret);
+            if (!o.UseDeviceAuth && string.IsNullOrEmpty(o.Secret))
+                throw new ArgumentException("If device authentication is not used, a client secret must be provided.");
+
+            var keyVaultServiceClient = o.UseDeviceAuth
+                ? new KeyVaultServiceClient($"https://{o.KeyVaultName}.vault.azure.net/", o.AppId)
+                : new KeyVaultServiceClient($"https://{o.KeyVaultName}.vault.azure.net/", o.AppId, o.Secret);
             var kvCertProvider = new KeyVaultCertificateProvider(keyVaultServiceClient);
 
             if (o.IsRootCA)
