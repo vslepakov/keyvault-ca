@@ -47,7 +47,8 @@ namespace KeyVaultCA.Web.Controllers
         [Route("enroll")]
         public async Task<string> Enroll(Csr csr)
         {
-            var cert = await _keyVaultCertProvider.SigningRequestAsync(Convert.FromBase64String(csr.CertificateRequest), csr.IssuerCertificateName);
+            var cert = await _keyVaultCertProvider.SigningRequestAsync(Convert.FromBase64String(csr.CertificateRequest), csr.IssuerCertificateName,
+                isIntermediateCA: false, pathLengthConstraint: 0, validity: TimeSpan.FromDays(365));
             return EncodeCertificateAsPem(cert);
         }
 

@@ -28,8 +28,8 @@ namespace KeyVaultCA.Web
         {
             var caConfig = new CAConfuguration();
 
-            var keyVaultServiceClient = new KeyVaultServiceClient($"https://{caConfig.KeyVaultName}.vault.azure.net/");
-            keyVaultServiceClient.SetAuthenticationClientCredential(caConfig.AppId, caConfig.Secret);
+            var keyVaultServiceClient = new KeyVaultServiceClient($"https://{caConfig.KeyVaultName}.vault.azure.net/",
+                caConfig.AppId, caConfig.Secret);
             var kvCertProvider = new KeyVaultCertificateProvider(keyVaultServiceClient);
 
             services.AddControllers();

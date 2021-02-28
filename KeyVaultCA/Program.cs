@@ -15,16 +15,22 @@ namespace KeyVaultCA
             [Option("appId", Required = true, HelpText = "AppId of the AAD service principal that can access KeyVault.")]
             public string AppId { get; set; }
 
-            [Option("secret", Required = true, HelpText = "Password of the AAD service principal that can access KeyVault.")]
+            [Option("secret", Required = false, HelpText = "Password of the AAD service principal that can access KeyVault.")]
             public string Secret { get; set; }
 
             [Option("kvName", Required = true, HelpText = "KeyVault name")]
             public string KeyVaultName { get; set; }
 
+            [Option("deviceAuth", Required = false, HelpText = "Use device authentication instead of client secret")]
+            public bool UseDeviceAuth { get; set; }
+
             // Certificates
 
             [Option("issuercert", Required = true, HelpText = "Name of the issuing certificate in KeyVault.")]
             public string IssuerCertName { get; set; }
+
+            [Option("validity", Required = false, HelpText = "Validity of the issued certificate in months (default 12)")]
+            public int ValidityMonths { get; set; } = 12;
 
             // Options for the end entity certificate
 
@@ -33,6 +39,12 @@ namespace KeyVaultCA
 
             [Option("output", Required = false, HelpText = "Output file name for the certificate")]
             public string OutputFileName { get; set; }
+
+            [Option("intermediate", Required = false, HelpText = "Is the certificate allowed to act as an intermediate certificate authority")]
+            public bool IsIntermediateCA { get; set; }
+
+            [Option("maxPathLength", Required = false, HelpText = "Maximum number of intermediate certificates that can follow this certificate")]
+            public int PathLengthConstraint { get; set; }
 
             // Options for Root CA creation
 
@@ -54,8 +66,15 @@ namespace KeyVaultCA
 
         private static async Task StartAsync(Options o)
         {
-            var keyVaultServiceClient = new KeyVaultServiceClient($"https://{o.KeyVaultName}.vault.azure.net/");
-            keyVaultServiceClient.SetAuthenticationClientCredential(o.AppId, o.Secret);
+            if (!o.UseDeviceAuth && string.IsNullOrEmpty(o.Secret))
+                throw new ArgumentException("If device authentication is not used, a client secret must be provided.");
+
+            var now = DateTime.Now;
+            var validity = now.AddMonths(o.ValidityMonths).Subtract(now);
+
+            var keyVaultServiceClient = o.UseDeviceAuth
+                ? new KeyVaultServiceClient($"https://{o.KeyVaultName}.vault.azure.net/", o.AppId)
+                : new KeyVaultServiceClient($"https://{o.KeyVaultName}.vault.azure.net/", o.AppId, o.Secret);
             var kvCertProvider = new KeyVaultCertificateProvider(keyVaultServiceClient);
 
             if (o.IsRootCA)
@@ -66,7 +85,7 @@ namespace KeyVaultCA
                 }
                     
                 // Generate issuing certificate in KeyVault
-                await kvCertProvider.CreateCACertificateAsync(o.IssuerCertName, o.Subject);
+                await kvCertProvider.CreateCACertificateAsync(o.IssuerCertName, o.Subject, o.PathLengthConstraint, validity);
             }
             else
             {
@@ -75,9 +94,9 @@ namespace KeyVaultCA
                     throw new ArgumentException("Path to CSR or the Output Filename is not provided.");
                 }
 
-                // Issue device certificate
+                // Issue device certificate or intermediate certificate
                 var csr = File.ReadAllBytes(o.PathToCsr);
-                var cert = await kvCertProvider.SigningRequestAsync(csr, o.IssuerCertName);
+                var cert = await kvCertProvider.SigningRequestAsync(csr, o.IssuerCertName, o.IsIntermediateCA, o.PathLengthConstraint, validity);
 
                 File.WriteAllBytes(o.OutputFileName, cert.Export(System.Security.Cryptography.X509Certificates.X509ContentType.Cert));
             }
