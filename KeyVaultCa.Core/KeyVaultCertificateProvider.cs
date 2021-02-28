@@ -15,7 +15,7 @@ namespace KeyVaultCa.Core
             _keyVaultServiceClient = keyVaultServiceClient;
         }
 
-        public async Task CreateCACertificateAsync(string issuerCertificateName, string subject, int pathLengthConstraint)
+        public async Task CreateCACertificateAsync(string issuerCertificateName, string subject, int pathLengthConstraint, TimeSpan validity)
         {
             var certVersions = await _keyVaultServiceClient.GetCertificateVersionsAsync(issuerCertificateName).ConfigureAwait(false);
 
@@ -26,7 +26,7 @@ namespace KeyVaultCa.Core
                         issuerCertificateName,
                         subject,
                         notBefore,
-                        notBefore.AddMonths(48), 
+                        notBefore.Add(validity), 
                         4096, 
                         256,
                         pathLengthConstraint);
@@ -43,7 +43,7 @@ namespace KeyVaultCa.Core
         /// Creates a KeyVault signed certficate from signing request.
         /// </summary>
         public async Task<X509Certificate2> SigningRequestAsync(byte[] certificateRequest, string issuerCertificateName,
-            bool isIntermediateCA, int pathLengthConstraint)
+            bool isIntermediateCA, int pathLengthConstraint, TimeSpan validity)
         {
             var pkcs10CertificationRequest = new Pkcs10CertificationRequest(certificateRequest);
             if (!pkcs10CertificationRequest.Verify())
@@ -63,7 +63,7 @@ namespace KeyVaultCa.Core
                 info.Subject.ToString(),
                 2048,
                 notBefore,
-                notBefore.AddMonths(12),
+                notBefore.Add(validity),
                 256,
                 signingCert,
                 publicKey,

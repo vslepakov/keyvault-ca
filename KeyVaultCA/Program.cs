@@ -29,6 +29,9 @@ namespace KeyVaultCA
             [Option("issuercert", Required = true, HelpText = "Name of the issuing certificate in KeyVault.")]
             public string IssuerCertName { get; set; }
 
+            [Option("validity", Required = false, HelpText = "Validity of the issued certificate in months (default 12)")]
+            public int ValidityMonths { get; set; } = 12;
+
             // Options for the end entity certificate
 
             [Option("csrPath", Required = false, HelpText = "Path to the CSR file in .der format")]
@@ -66,6 +69,9 @@ namespace KeyVaultCA
             if (!o.UseDeviceAuth && string.IsNullOrEmpty(o.Secret))
                 throw new ArgumentException("If device authentication is not used, a client secret must be provided.");
 
+            var now = DateTime.Now;
+            var validity = now.AddMonths(o.ValidityMonths).Subtract(now);
+
             var keyVaultServiceClient = o.UseDeviceAuth
                 ? new KeyVaultServiceClient($"https://{o.KeyVaultName}.vault.azure.net/", o.AppId)
                 : new KeyVaultServiceClient($"https://{o.KeyVaultName}.vault.azure.net/", o.AppId, o.Secret);
@@ -79,7 +85,7 @@ namespace KeyVaultCA
                 }
                     
                 // Generate issuing certificate in KeyVault
-                await kvCertProvider.CreateCACertificateAsync(o.IssuerCertName, o.Subject, o.PathLengthConstraint);
+                await kvCertProvider.CreateCACertificateAsync(o.IssuerCertName, o.Subject, o.PathLengthConstraint, validity);
             }
             else
             {
@@ -90,7 +96,7 @@ namespace KeyVaultCA
 
                 // Issue device certificate or intermediate certificate
                 var csr = File.ReadAllBytes(o.PathToCsr);
-                var cert = await kvCertProvider.SigningRequestAsync(csr, o.IssuerCertName, o.IsIntermediateCA, o.PathLengthConstraint);
+                var cert = await kvCertProvider.SigningRequestAsync(csr, o.IssuerCertName, o.IsIntermediateCA, o.PathLengthConstraint, validity);
 
                 File.WriteAllBytes(o.OutputFileName, cert.Export(System.Security.Cryptography.X509Certificates.X509ContentType.Cert));
             }

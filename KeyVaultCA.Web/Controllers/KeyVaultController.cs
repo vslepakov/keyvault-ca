@@ -1,6 +1,7 @@
 ﻿using KeyVaultCa.Core;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
@@ -46,7 +47,7 @@ namespace KeyVaultCA.Web.Controllers
         public async Task<byte[]> Enroll(byte[] certificateRequest, string issuerCertificateName)
         {
             var cert = await _keyVaultCertProvider.SigningRequestAsync(certificateRequest, issuerCertificateName,
-                isIntermediateCA: false, pathLengthConstraint: 0);
+                isIntermediateCA: false, pathLengthConstraint: 0, validity: TimeSpan.FromDays(365));
             return cert.Export(X509ContentType.Cert);
         }
 
