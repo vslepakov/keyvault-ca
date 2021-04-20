@@ -18,7 +18,8 @@
         "KeyVaultName": "",
         "ASPNETCORE_ENVIRONMENT": "Development",
         "AppId": "",
-        "Issuers": "ContosoRootCA"
+        "CACerts": "",
+        "IssuingCA": ""
       }
     },
     "KeyVaultCA.Web": {
@@ -29,20 +30,23 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "dotnetRunMessages": "true",
-      "applicationUrl": "http://localhost:5000"
+      "applicationUrl": "http://localhost:49153"
     },
     "Docker": {
       "commandName": "Docker",
       "launchBrowser": true,
+      "httpPort": 49153,
+      "useSSL": false,
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/swagger",
-      "publishAllPorts": true,
       "environmentVariables": {
         "Secret": "",
         "KeyVaultName": "",
         "ASPNETCORE_ENVIRONMENT": "Development",
         "AppId": "",
-        "Issuers": "ContosoRootCA"
-      }
+        "IssuingCA": "",
+        "CACerts": ""
+      },
+      "publishAllPorts": true
     }
   }
 }

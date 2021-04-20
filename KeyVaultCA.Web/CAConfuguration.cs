@@ -11,11 +11,13 @@ namespace KeyVaultCA.Web
 
         public string Secret => Environment.GetEnvironmentVariable("Secret");
 
-        public IList<string> Issuers 
+        public string IssuingCA => Environment.GetEnvironmentVariable("IssuingCA");
+
+        public IList<string> CACerts 
         { 
             get 
             {
-                return Environment.GetEnvironmentVariable("Issuers").Split(',');
+                return Environment.GetEnvironmentVariable("CACerts").Split(',');
             } 
         }
     }
