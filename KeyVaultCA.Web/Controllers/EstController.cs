@@ -1,4 +1,5 @@
 ﻿using KeyVaultCa.Core;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
@@ -30,6 +31,7 @@ namespace KeyVaultCA.Web.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         [Route("cacerts")]
         public async Task<IActionResult> GetCACertsAsync()
         {
@@ -50,6 +52,7 @@ namespace KeyVaultCA.Web.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         [Route("simpleenroll")]
         [Consumes(PKCS10_MIME_TYPE)]
         public async Task<IActionResult> EnrollAsync()

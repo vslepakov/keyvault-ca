@@ -19,7 +19,9 @@
         "ASPNETCORE_ENVIRONMENT": "Development",
         "AppId": "",
         "CACerts": "",
-        "IssuingCA": ""
+        "IssuingCA": "",
+        "Username": "",
+        "Password": ""
       }
     },
     "KeyVaultCA.Web": {
@@ -44,7 +46,9 @@
         "ASPNETCORE_ENVIRONMENT": "Development",
         "AppId": "",
         "IssuingCA": "",
-        "CACerts": ""
+        "CACerts": "",
+        "Username": "",
+        "Password": ""
       },
       "publishAllPorts": true
     }

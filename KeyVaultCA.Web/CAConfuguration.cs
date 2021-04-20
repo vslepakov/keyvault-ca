@@ -20,5 +20,9 @@ namespace KeyVaultCA.Web
                 return Environment.GetEnvironmentVariable("CACerts").Split(',');
             } 
         }
+
+        public string Username => Environment.GetEnvironmentVariable("Username");
+
+        public string Password => Environment.GetEnvironmentVariable("Password");
     }
 }
