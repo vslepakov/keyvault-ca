@@ -47,7 +47,7 @@ namespace KeyVaultCA.Web.Controllers
                 }
             }
 
-            var pkcs7 = EncodeCertificateAsPem(caCerts.ToArray());
+            var pkcs7 = EncodeCertificatesAsPkcs7(caCerts.ToArray());
             return Content(pkcs7, PKCS7_MIME_TYPE);
         }
 
@@ -63,11 +63,11 @@ namespace KeyVaultCA.Web.Controllers
 
             var cert = await _keyVaultCertProvider.SigningRequestAsync(Convert.FromBase64String(cleanedUpBody), _confuguration.IssuingCA);
 
-            var pkcs7 = EncodeCertificateAsPem(new[] { cert });
+            var pkcs7 = EncodeCertificatesAsPkcs7(new[] { cert });
             return Content(pkcs7, PKCS7_MIME_TYPE);
         }
 
-        private string EncodeCertificateAsPem(X509Certificate2 [] certs)
+        private string EncodeCertificatesAsPkcs7(X509Certificate2 [] certs)
         {
             var collection = new X509Certificate2Collection(certs);
             var data = collection.Export(X509ContentType.Pkcs7);
