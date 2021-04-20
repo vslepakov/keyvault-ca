@@ -20,7 +20,7 @@ namespace KeyVaultCA.Web.Auth
             _confuguration = confuguration;
             _users = new()
             {
-                new User { Id = 1, FirstName = "Max", LastName = "Mustermann", Username = _confuguration.Username, Password = _confuguration.Password }
+                new User { Id = 1, FirstName = "Max", LastName = "Mustermann", Username = _confuguration.EstUsername, Password = _confuguration.EstPassword }
             };
         }
 

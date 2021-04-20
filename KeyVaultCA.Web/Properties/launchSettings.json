@@ -15,7 +15,7 @@
       "launchUrl": "swagger",
       "environmentVariables": {
         "Secret": "",
-        "KeyVaultName": "",
+        "KeyVaultName": "2",
         "ASPNETCORE_ENVIRONMENT": "Development",
         "AppId": "",
         "CACerts": "",
@@ -47,8 +47,8 @@
         "AppId": "",
         "IssuingCA": "",
         "CACerts": "",
-        "Username": "",
-        "Password": ""
+        "EstUser": "",
+        "EstPassword": ""
       },
       "publishAllPorts": true
     }

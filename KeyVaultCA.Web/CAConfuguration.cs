@@ -21,8 +21,8 @@ namespace KeyVaultCA.Web
             } 
         }
 
-        public string Username => Environment.GetEnvironmentVariable("Username");
+        public string EstUsername => Environment.GetEnvironmentVariable("EstUser");
 
-        public string Password => Environment.GetEnvironmentVariable("Password");
+        public string EstPassword => Environment.GetEnvironmentVariable("EstPassword");
     }
 }
