@@ -80,7 +80,8 @@ namespace KeyVaultCA.Web.Controllers
 
         private string CleanUpAsn1Structure(string raw)
         {
-            var tokens = raw.Split(Environment.NewLine);
+            // Need to handle different types of Line Breaks (e.g. Linux to this Api running on Windows
+            var tokens = raw.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
             return string.Join("", tokens.Skip(1).Take(tokens.Length - 3));
         }
     }
