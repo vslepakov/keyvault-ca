@@ -1,17 +1,16 @@
-﻿using Microsoft.Azure.KeyVault.Models;
-using Org.BouncyCastle.Pkcs;
+﻿using Org.BouncyCastle.Pkcs;
 using System;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 
-namespace KeyVaultCA
+namespace KeyVaultCa.Core
 {
-    internal class KeyVaultCertificateProvider
+    public class KeyVaultCertificateProvider : IKeyVaultCertificateProvider
     {
         private readonly KeyVaultServiceClient _keyVaultServiceClient;
 
-        internal KeyVaultCertificateProvider(KeyVaultServiceClient keyVaultServiceClient)
+        public KeyVaultCertificateProvider(KeyVaultServiceClient keyVaultServiceClient)
         {
             _keyVaultServiceClient = keyVaultServiceClient;
         }
@@ -33,10 +32,16 @@ namespace KeyVaultCA
             }
         }
 
+        public async Task<X509Certificate2> GetCertificateAsync(string issuerCertificateName)
+        {
+            var certBundle = await _keyVaultServiceClient.GetCertificateAsync(issuerCertificateName).ConfigureAwait(false);
+            return new X509Certificate2(certBundle.Cer);
+        }
+
         /// <summary>
         /// Creates a KeyVault signed certficate from signing request.
         /// </summary>
-        internal async Task<X509Certificate2> SigningRequestAsync(byte[] certificateRequest, string issuerCertificateName)
+        public async Task<X509Certificate2> SigningRequestAsync(byte[] certificateRequest, string issuerCertificateName)
         {
             var pkcs10CertificationRequest = new Pkcs10CertificationRequest(certificateRequest);
             if (!pkcs10CertificationRequest.Verify())
