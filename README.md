@@ -1,5 +1,6 @@
 # Some Context
-Please refer to [this blog post](https://vslepakov.medium.com/build-a-lightweight-pki-for-iot-using-azure-keyvault-acc46bce26ed) for details.
+
+Please refer to [this blog post](https://vslepakov.medium.com/build-a-lightweight-pki-for-iot-using-azure-keyvault-acc46bce26ed) for details.  
 
 ![Overview](assets/arch.png "High Level Architecture")
 
