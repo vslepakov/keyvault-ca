@@ -54,7 +54,7 @@ DISCLAIMER: NOT all of the the EST methods are implemented. It is only:
 - [/cacerts](https://tools.ietf.org/html/rfc7030#section-4.1)
 - [/simpleenroll](https://tools.ietf.org/html/rfc7030#section-4.2)
 
-The endpoints above are used by Azure IoT Edge 1.2
+The endpoints above are used by and work with Azure IoT Edge 1.2 which supports certificate enrollment via EST.  
 
 Build and deploy (or run in container) the ```KeyVaultCA.Web``` project.  
 You need to provide following environment variables:  
