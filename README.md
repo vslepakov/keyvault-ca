@@ -1,5 +1,5 @@
 # Some Context
-Please refer to [this blog post](ADD LINK) for details.  
+Please refer to [this blog post](https://vslepakov.medium.com/build-a-lightweight-pki-for-iot-using-azure-keyvault-acc46bce26ed) for details.
 
 ![Overview](assets/arch.png "High Level Architecture")
 
@@ -47,3 +47,22 @@ You will get an output containing ```appId``` and ```password```, please note th
 ```dotnet run --appId <YOUR_APPID> --secret <YOUR_APP_SECRET> \```  
 ```--issuercert ContosoRootCA --csrPath <PATH_TO_CSR_IN_DER_FORMAT> \```  
 ```--output <OUTPUT_CERTIFICATE_FILENAME> --kvName <KEYVAULT_NAME>```
+
+## Use the [EST](https://tools.ietf.org/html/rfc7030) Facade to request a certificate
+
+DISCLAIMER: NOT all of the the EST methods are implemented. It is only:
+- [/cacerts](https://tools.ietf.org/html/rfc7030#section-4.1)
+- [/simpleenroll](https://tools.ietf.org/html/rfc7030#section-4.2)
+
+The endpoints above are used by Azure IoT Edge 1.2
+
+Build and deploy (or run in container) the ```KeyVaultCA.Web``` project.  
+You need to provide following environment variables:  
+  
+```Secret``` - This you service principal secret to access the KeyVault (see ```YOUR_APP_SECRET``` above)  
+```AppId``` - This is the app id of the service principal to access the KeyVault (see ```YOUR_APPID``` above)  
+```KeyVaultName``` - Name of your KeyVault  
+```IssuingCA``` - Name of the certificate in the KeyVault to issue your leaf certificate  
+```CACerts``` - CA certs stored in the KeyVault to return through the ```/est/cacerts``` endpoint  
+```EstUser``` - Username for the EST enpoint (using Basic Auth for now, will update to use client certs)  
+```EstPassword``` - Password for the EST endpoint (using Basic Auth for now, will update to use client certs)  
