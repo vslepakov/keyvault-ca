@@ -1,4 +1,4 @@
-﻿using KeyVaultCa.Core;
+using KeyVaultCa.Core;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;

@@ -1,4 +1,4 @@
-﻿using Org.BouncyCastle.Pkcs;
+using Org.BouncyCastle.Pkcs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
