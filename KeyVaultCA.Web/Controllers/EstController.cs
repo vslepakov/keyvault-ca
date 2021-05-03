@@ -35,19 +35,9 @@ namespace KeyVaultCA.Web.Controllers
         [Route("cacerts")]
         public async Task<IActionResult> GetCACertsAsync()
         {
-            var caCerts = new List<X509Certificate2>();
-
-            foreach (var issuerName in _confuguration.CACerts)
-            {
-                var cert = await _keyVaultCertProvider.GetCertificateAsync(issuerName).ConfigureAwait(false);
-
-                if (cert != null)
-                {
-                    caCerts.Add(cert);
-                }
-            }
-
+            var caCerts = await _keyVaultCertProvider.GetPublicCertificatesByName(_confuguration.CACerts);
             var pkcs7 = EncodeCertificatesAsPkcs7(caCerts.ToArray());
+
             return Content(pkcs7, PKCS7_MIME_TYPE);
         }
 
@@ -61,7 +51,8 @@ namespace KeyVaultCA.Web.Controllers
             var body = await reader.ReadToEndAsync();
             var cleanedUpBody = CleanUpAsn1Structure(body);
 
-            var cert = await _keyVaultCertProvider.SigningRequestAsync(Convert.FromBase64String(cleanedUpBody), _confuguration.IssuingCA);
+            var cert = await _keyVaultCertProvider.SigningRequestAsync(
+                Convert.FromBase64String(cleanedUpBody), _confuguration.IssuingCA, _confuguration.CertValidityInDays);
 
             var pkcs7 = EncodeCertificatesAsPkcs7(new[] { cert });
             return Content(pkcs7, PKCS7_MIME_TYPE);

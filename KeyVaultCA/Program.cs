@@ -77,7 +77,7 @@ namespace KeyVaultCA
 
                 // Issue device certificate
                 var csr = File.ReadAllBytes(o.PathToCsr);
-                var cert = await kvCertProvider.SigningRequestAsync(csr, o.IssuerCertName);
+                var cert = await kvCertProvider.SigningRequestAsync(csr, o.IssuerCertName, 365);
 
                 File.WriteAllBytes(o.OutputFileName, cert.Export(System.Security.Cryptography.X509Certificates.X509ContentType.Cert));
             }
