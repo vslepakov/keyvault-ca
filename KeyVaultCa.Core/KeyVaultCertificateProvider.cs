@@ -1,5 +1,6 @@
-﻿using Org.BouncyCastle.Pkcs;
+using Org.BouncyCastle.Pkcs;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
@@ -38,10 +39,27 @@ namespace KeyVaultCa.Core
             return new X509Certificate2(certBundle.Cer);
         }
 
+        public async Task<IList<X509Certificate2>> GetPublicCertificatesByName(IEnumerable<string> certNames)
+        {
+            var certs = new List<X509Certificate2>();
+
+            foreach (var issuerName in certNames)
+            {
+                var cert = await GetCertificateAsync(issuerName).ConfigureAwait(false);
+
+                if (cert != null)
+                {
+                    certs.Add(cert);
+                }
+            }
+
+            return certs;
+        }
+
         /// <summary>
         /// Creates a KeyVault signed certficate from signing request.
         /// </summary>
-        public async Task<X509Certificate2> SigningRequestAsync(byte[] certificateRequest, string issuerCertificateName)
+        public async Task<X509Certificate2> SigningRequestAsync(byte[] certificateRequest, string issuerCertificateName, int validityInDays)
         {
             var pkcs10CertificationRequest = new Pkcs10CertificationRequest(certificateRequest);
             if (!pkcs10CertificationRequest.Verify())
@@ -61,7 +79,7 @@ namespace KeyVaultCa.Core
                 info.Subject.ToString(),
                 2048,
                 notBefore,
-                notBefore.AddMonths(12),
+                notBefore.AddDays(validityInDays),
                 256,
                 signingCert,
                 publicKey,

@@ -67,3 +67,5 @@ You need to provide following environment variables:
 ```CACerts``` - CA certs stored in the KeyVault to return through the ```/est/cacerts``` endpoint  
 ```EstUser``` - Username for the EST enpoint (using Basic Auth for now, will update to use client certs)  
 ```EstPassword``` - Password for the EST endpoint (using Basic Auth for now, will update to use client certs)  
+```CertValidityInDays``` - Specifies validity period for issued certs  
+```AuthMode``` - Authentication mode for the EST API. Pissible values are: "x509" and "Basic"

@@ -1,8 +1,14 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace KeyVaultCA.Web
 {
+    public enum AuthMode
+    {
+        Basic = 0,
+        x509 = 1
+    }
+
     public class CAConfuguration
     {
         public string KeyVaultName => Environment.GetEnvironmentVariable("KeyVaultName");
@@ -24,5 +30,9 @@ namespace KeyVaultCA.Web
         public string EstUsername => Environment.GetEnvironmentVariable("EstUser");
 
         public string EstPassword => Environment.GetEnvironmentVariable("EstPassword");
+
+        public int CertValidityInDays => int.Parse(Environment.GetEnvironmentVariable("CertValidityInDays"));
+
+        public AuthMode AuthMode => (AuthMode)Enum.Parse(typeof(AuthMode), Environment.GetEnvironmentVariable("AuthMode"));
     }
 }

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Server.Kestrel.Https;
 using Microsoft.Extensions.Hosting;
 
 namespace KeyVaultCA.Web
@@ -15,6 +16,15 @@ namespace KeyVaultCA.Web
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
+                    webBuilder.ConfigureKestrel(o =>
+                    {
+                        var caConfig = new CAConfuguration();
+
+                        if(caConfig.AuthMode == AuthMode.x509)
+                        {
+                            o.ConfigureHttpsDefaults(o => o.ClientCertificateMode = ClientCertificateMode.RequireCertificate);
+                        }
+                    });
                 });
     }
 }

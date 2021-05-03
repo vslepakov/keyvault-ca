@@ -4,7 +4,7 @@
     "anonymousAuthentication": true,
     "iisExpress": {
       "applicationUrl": "http://localhost:31916",
-      "sslPort": 0
+      "sslPort": 39399
     }
   },
   "$schema": "http://json.schemastore.org/launchsettings.json",
@@ -14,14 +14,16 @@
       "launchBrowser": true,
       "launchUrl": "swagger",
       "environmentVariables": {
+        "CACerts": "ContosoRootCA",
+        "IssuingCA": "ContosoRootCA",
         "Secret": "",
-        "KeyVaultName": "2",
+        "KeyVaultName": "",
+        "CertValidityInDays": "365",
         "ASPNETCORE_ENVIRONMENT": "Development",
         "AppId": "",
-        "CACerts": "",
-        "IssuingCA": "",
-        "Username": "",
-        "Password": ""
+        "EstPassword": "",
+        "EstUser": "",
+        "AuthMode": "Basic"
       }
     },
     "KeyVaultCA.Web": {
@@ -37,20 +39,23 @@
     "Docker": {
       "commandName": "Docker",
       "launchBrowser": true,
-      "httpPort": 49153,
-      "useSSL": false,
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/swagger",
       "environmentVariables": {
+        "CACerts": "ContosoRootCA",
+        "IssuingCA": "ContosoRootCA",
         "Secret": "",
         "KeyVaultName": "",
+        "CertValidityInDays": "365",
         "ASPNETCORE_ENVIRONMENT": "Development",
         "AppId": "",
-        "IssuingCA": "",
-        "CACerts": "",
+        "EstPassword": "",
         "EstUser": "",
-        "EstPassword": ""
+        "AuthMode": "Basic"
       },
-      "publishAllPorts": true
+      "publishAllPorts": true,
+      "httpPort": 49153,
+      "useSSL": false,
+      "httpsPort": 49154
     }
   }
 }
