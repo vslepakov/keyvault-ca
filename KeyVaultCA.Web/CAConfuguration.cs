@@ -19,14 +19,6 @@ namespace KeyVaultCA.Web
 
         public string IssuingCA => Environment.GetEnvironmentVariable("IssuingCA");
 
-        public IList<string> CACerts 
-        { 
-            get 
-            {
-                return Environment.GetEnvironmentVariable("CACerts").Split(',');
-            } 
-        }
-
         public string EstUsername => Environment.GetEnvironmentVariable("EstUser");
 
         public string EstPassword => Environment.GetEnvironmentVariable("EstPassword");
