@@ -14,7 +14,6 @@
       "launchBrowser": true,
       "launchUrl": "swagger",
       "environmentVariables": {
-        "CACerts": "ContosoRootCA",
         "IssuingCA": "ContosoRootCA",
         "Secret": "",
         "KeyVaultName": "",
@@ -41,7 +40,6 @@
       "launchBrowser": true,
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/swagger",
       "environmentVariables": {
-        "CACerts": "ContosoRootCA",
         "IssuingCA": "ContosoRootCA",
         "Secret": "",
         "KeyVaultName": "",

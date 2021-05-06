@@ -9,6 +9,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
@@ -49,12 +51,20 @@ namespace KeyVaultCA.Web
                 services.AddAuthentication(CertificateAuthenticationDefaults.AuthenticationScheme)
                    .AddCertificate(options =>
                    {
-                        // Azure KeyVault does not support this
+                       var trustedCAs = new List<X509Certificate2>();
+                       var trustedCADir = Path.Combine(Directory.GetCurrentDirectory(), @"TrustedCAs");
+                       foreach (var file in Directory.EnumerateFiles(trustedCADir, "*.cer"))
+                       {
+                           var contents = File.ReadAllBytes(file);
+                           trustedCAs.Add(new X509Certificate2(contents));
+                       }
+
+                       options.CustomTrustStore.AddRange(new X509Certificate2Collection(trustedCAs.ToArray()));
+
+                       // Azure KeyVault does not support this
                        options.RevocationMode = X509RevocationMode.NoCheck;
                        options.ChainTrustValidationMode = X509ChainTrustMode.CustomRootTrust;
 
-                       var trustedCAs = kvCertProvider.GetPublicCertificatesByName(caConfig.CACerts).Result;
-                       options.CustomTrustStore.AddRange(new X509Certificate2Collection(trustedCAs.ToArray()));
                        options.Events = new CertificateAuthenticationEvents
                        {
                            OnCertificateValidated = context =>

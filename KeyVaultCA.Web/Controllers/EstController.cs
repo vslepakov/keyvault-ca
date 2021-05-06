@@ -35,7 +35,7 @@ namespace KeyVaultCA.Web.Controllers
         [Route("cacerts")]
         public async Task<IActionResult> GetCACertsAsync()
         {
-            var caCerts = await _keyVaultCertProvider.GetPublicCertificatesByName(_confuguration.CACerts);
+            var caCerts = await _keyVaultCertProvider.GetPublicCertificatesByName(new [] { _confuguration.IssuingCA });
             var pkcs7 = EncodeCertificatesAsPkcs7(caCerts.ToArray());
 
             return Content(pkcs7, PKCS7_MIME_TYPE);

@@ -60,12 +60,13 @@ The endpoints above are used by and work with Azure IoT Edge 1.2 which supports 
 Build and deploy (or run in container) the ```KeyVaultCA.Web``` project.  
 You need to provide following environment variables:  
   
-```Secret``` - This you service principal secret to access the KeyVault (see ```YOUR_APP_SECRET``` above)  
-```AppId``` - This is the app id of the service principal to access the KeyVault (see ```YOUR_APPID``` above)  
-```KeyVaultName``` - Name of your KeyVault  
-```IssuingCA``` - Name of the certificate in the KeyVault to issue your leaf certificate  
-```CACerts``` - CA certs stored in the KeyVault to return through the ```/est/cacerts``` endpoint  
-```EstUser``` - Username for the EST enpoint (using Basic Auth for now, will update to use client certs)  
-```EstPassword``` - Password for the EST endpoint (using Basic Auth for now, will update to use client certs)  
-```CertValidityInDays``` - Specifies validity period for issued certs  
-```AuthMode``` - Authentication mode for the EST API. Pissible values are: "x509" and "Basic"
+```Secret``` - This you service principal secret to access the KeyVault (see ```YOUR_APP_SECRET``` above).  
+```AppId``` - This is the app id of the service principal to access the KeyVault (see ```YOUR_APPID``` above).  
+```KeyVaultName``` - Name of your KeyVault.  
+```IssuingCA``` - Name of the certificate in the KeyVault to issue your leaf certificate.  
+```EstUser``` - Username for the EST enpoint (using Basic Auth for now, will update to use client certs).  
+```EstPassword``` - Password for the EST endpoint (using Basic Auth for now, will update to use client certs).  
+```CertValidityInDays``` - Specifies validity period for issued certs.  
+```AuthMode``` - Authentication mode for the EST API. Pissible values are: "x509" and "Basic". In case you choose "x509", put your trusted CA certs into the ```KeyVaultCA.Web\TrustedCAs``` folder. Make sure to specify CopyToOutput.  
+
+The implementation returns the IssuingCA via the ```/cacerts``` endpoint.  
