@@ -59,7 +59,11 @@ namespace KeyVaultCa.Core
         /// <summary>
         /// Creates a KeyVault signed certficate from signing request.
         /// </summary>
-        public async Task<X509Certificate2> SigningRequestAsync(byte[] certificateRequest, string issuerCertificateName, int validityInDays)
+        public async Task<X509Certificate2> SigningRequestAsync(
+            byte[] certificateRequest, 
+            string issuerCertificateName, 
+            int validityInDays,
+            bool caCert = false)
         {
             var pkcs10CertificationRequest = new Pkcs10CertificationRequest(certificateRequest);
             if (!pkcs10CertificationRequest.Verify())
@@ -83,7 +87,8 @@ namespace KeyVaultCa.Core
                 256,
                 signingCert,
                 publicKey,
-                new KeyVaultSignatureGenerator(_keyVaultServiceClient, certBundle.KeyIdentifier.Identifier, signingCert)
+                new KeyVaultSignatureGenerator(_keyVaultServiceClient, certBundle.KeyIdentifier.Identifier, signingCert),
+                caCert
                 );
         }
     }

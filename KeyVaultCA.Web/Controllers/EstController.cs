@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
@@ -13,7 +12,6 @@ using System.Threading.Tasks;
 namespace KeyVaultCA.Web.Controllers
 {
     [ApiController]
-    [Route(".well-known/est")]
     public class EstController : ControllerBase
     {
         private const string PKCS7_MIME_TYPE = "application/pkcs7-mime";
@@ -32,7 +30,8 @@ namespace KeyVaultCA.Web.Controllers
 
         [HttpGet]
         [Authorize]
-        [Route("cacerts")]
+        [Route(".well-known/est/cacerts")]
+        [Route("ca/.well-known/est/cacerts")]
         public async Task<IActionResult> GetCACertsAsync()
         {
             var caCerts = await _keyVaultCertProvider.GetPublicCertificatesByName(new [] { _confuguration.IssuingCA });
@@ -43,16 +42,17 @@ namespace KeyVaultCA.Web.Controllers
 
         [HttpPost]
         [Authorize]
-        [Route("simpleenroll")]
+        [Route(".well-known/est/simpleenroll")]
+        [Route("ca/.well-known/est/simpleenroll")]
         [Consumes(PKCS10_MIME_TYPE)]
         public async Task<IActionResult> EnrollAsync()
         {
-            using var reader = new StreamReader(Request.Body, Encoding.UTF8);
-            var body = await reader.ReadToEndAsync();
-            var cleanedUpBody = CleanUpAsn1Structure(body);
+            var cleanedUpBody = await GetAsn1StructureFromBody();
+
+            var caCert = Request.Path.StartsWithSegments("/ca");
 
             var cert = await _keyVaultCertProvider.SigningRequestAsync(
-                Convert.FromBase64String(cleanedUpBody), _confuguration.IssuingCA, _confuguration.CertValidityInDays);
+                Convert.FromBase64String(cleanedUpBody), _confuguration.IssuingCA, _confuguration.CertValidityInDays, caCert);
 
             var pkcs7 = EncodeCertificatesAsPkcs7(new[] { cert });
             return Content(pkcs7, PKCS7_MIME_TYPE);
@@ -69,10 +69,13 @@ namespace KeyVaultCA.Web.Controllers
             return builder.ToString();
         }
 
-        private string CleanUpAsn1Structure(string raw)
+        private async Task<string> GetAsn1StructureFromBody()
         {
+            using var reader = new StreamReader(Request.Body, Encoding.UTF8);
+            var body = await reader.ReadToEndAsync();
+
             // Need to handle different types of Line Breaks (e.g. Linux to this Api running on Windows
-            var tokens = raw.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+            var tokens = body.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
             return string.Join("", tokens.Skip(1).Take(tokens.Length - 3));
         }
     }

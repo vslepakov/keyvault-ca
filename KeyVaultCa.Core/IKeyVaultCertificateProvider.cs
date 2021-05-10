@@ -12,6 +12,6 @@ namespace KeyVaultCa.Core
 
         Task<X509Certificate2> GetCertificateAsync(string issuerCertificateName);
 
-        Task<X509Certificate2> SigningRequestAsync(byte[] certificateRequest, string issuerCertificateName, int validityInDays);
+        Task<X509Certificate2> SigningRequestAsync(byte[] certificateRequest, string issuerCertificateName, int validityInDays, bool caCert = false);
     }
 }
