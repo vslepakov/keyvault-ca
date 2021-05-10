@@ -69,4 +69,5 @@ You need to provide following environment variables:
 ```CertValidityInDays``` - Specifies validity period for issued certs.  
 ```AuthMode``` - Authentication mode for the EST API. Pissible values are: "x509" and "Basic". In case you choose "x509", put your trusted CA certs into the ```KeyVaultCA.Web\TrustedCAs``` folder. Make sure to specify CopyToOutput.  
 
-The implementation returns the IssuingCA via the ```/cacerts``` endpoint.  
+The implementation returns IssuingCA via the ```/cacerts``` endpoint.  
+Refer to [this repo](https://github.com/arlotito/iot-edge-1.2-tpm) for details on IoT Edge configuration, including PKCS#11 and EST.
