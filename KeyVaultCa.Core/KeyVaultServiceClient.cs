@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.Rest.Azure;
 using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
@@ -20,6 +21,9 @@ namespace KeyVaultCa.Core
         private readonly string _vaultBaseUrl;
         private IKeyVaultClient _keyVaultClient;
         private ClientCredential _clientCredential;
+
+        //using a static http client to try to pool TCP outbound connections
+        private static HttpClient httpClient = new HttpClient(); 
 
         /// <summary>
         /// Create the service client for KeyVault, with user or service credentials.
@@ -39,7 +43,7 @@ namespace KeyVaultCa.Core
         {
             _clientCredential = new ClientCredential(appId, appSecret);
             _keyVaultClient = new KeyVaultClient(
-                new KeyVaultClient.AuthenticationCallback(GetAccessTokenAsync));
+                new KeyVaultClient.AuthenticationCallback(GetAccessTokenAsync), httpClient); //using the static http client
         }
 
         public async Task<X509Certificate2> CreateCACertificateAsync(
@@ -268,14 +272,37 @@ namespace KeyVaultCa.Core
             return attributes;
         }
 
+        //cache the token and ask for a new one only if expired
+        private AuthenticationResult authenticationResult = null;
+
         /// <summary>
         /// Private callback for keyvault authentication.
         /// </summary>
         private async Task<string> GetAccessTokenAsync(string authority, string resource, string scope)
         {
-            var context = new AuthenticationContext(authority, TokenCache.DefaultShared);
-            var result = await context.AcquireTokenAsync(resource, _clientCredential);
-            return result.AccessToken;
+            bool needRequestToken = false;
+
+            if (authenticationResult == null)
+            {
+                needRequestToken = true;
+            }
+            else
+            {
+                TimeSpan timeToExpire = authenticationResult.ExpiresOn - DateTime.UtcNow;
+
+                if (timeToExpire < TimeSpan.FromMinutes(5))
+                {
+                    needRequestToken = true;
+                }
+            }
+
+            if (needRequestToken)
+            {
+                var context = new AuthenticationContext(authority, TokenCache.DefaultShared);
+                authenticationResult = await context.AcquireTokenAsync(resource, _clientCredential);
+            }
+           
+            return authenticationResult.AccessToken;
         }
 
         /// <summary>
