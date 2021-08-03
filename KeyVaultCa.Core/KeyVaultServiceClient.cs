@@ -3,6 +3,7 @@ using Microsoft.Azure.KeyVault.Models;
 using Microsoft.Azure.KeyVault.WebKey;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.Rest.Azure;
+using Polly;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -214,7 +215,19 @@ namespace KeyVaultCa.Core
                 throw new ArgumentOutOfRangeException(nameof(padding));
             }
 
-            var result = await _keyVaultClient.SignAsync(signingKey, algorithm, digest, ct).ConfigureAwait(false);
+            KeyOperationResult result = null;
+
+            Random jitterer = new Random();
+
+            var retryPolicy = await Policy
+              .Handle<Exception>() // etc
+              .WaitAndRetryAsync(6, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))  // exponential back-off: 2, 4, 8 etc
+                               + TimeSpan.FromMilliseconds(jitterer.Next(0, 1000))) // plus some jitter: up to 1 second                                                                                                  
+              .ExecuteAndCaptureAsync(async () =>
+              {
+                 result = await _keyVaultClient.SignAsync(signingKey, algorithm, digest, ct).ConfigureAwait(false);
+              });
+                
             return result.Result;
         }
 
