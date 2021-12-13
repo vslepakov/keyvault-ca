@@ -9,7 +9,7 @@ namespace KeyVaultCA.Web
         x509 = 1
     }
 
-    public class CAConfuguration
+    public class CAConfiguration
     {
         public string KeyVaultName => Environment.GetEnvironmentVariable("KeyVaultName");
 

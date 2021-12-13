@@ -12,10 +12,10 @@ namespace KeyVaultCA.Web.Auth
 
     public class UserService : IUserService
     {
-        private readonly CAConfuguration _confuguration;
+        private readonly CAConfiguration _confuguration;
         private readonly List<User> _users;
 
-        public UserService(CAConfuguration confuguration)
+        public UserService(CAConfiguration confuguration)
         {
             _confuguration = confuguration;
             _users = new()
