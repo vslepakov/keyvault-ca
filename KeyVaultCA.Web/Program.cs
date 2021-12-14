@@ -18,7 +18,7 @@ namespace KeyVaultCA.Web
                     webBuilder.UseStartup<Startup>();
                     webBuilder.ConfigureKestrel(o =>
                     {
-                        var caConfig = new CAConfuguration();
+                        var caConfig = new CAConfiguration();
 
                         if(caConfig.AuthMode == AuthMode.x509)
                         {

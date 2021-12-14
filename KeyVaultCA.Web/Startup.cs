@@ -30,7 +30,7 @@ namespace KeyVaultCA.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            var caConfig = new CAConfuguration();
+            var caConfig = new CAConfiguration();
 
             var keyVaultServiceClient = new KeyVaultServiceClient($"https://{caConfig.KeyVaultName}.vault.azure.net/");
             keyVaultServiceClient.SetAuthenticationClientCredential(caConfig.AppId, caConfig.Secret);
@@ -55,8 +55,8 @@ namespace KeyVaultCA.Web
                        var trustedCADir = Path.Combine(Directory.GetCurrentDirectory(), @"TrustedCAs");
                        foreach (var file in Directory.EnumerateFiles(trustedCADir, "*.cer"))
                        {
-                           var contents = File.ReadAllBytes(file);
-                           trustedCAs.Add(new X509Certificate2(contents));
+                           var contents = File.ReadAllText(file);
+                           trustedCAs.Add(new X509Certificate2(Convert.FromBase64String(contents)));
                        }
 
                        options.CustomTrustStore.AddRange(new X509Certificate2Collection(trustedCAs.ToArray()));
