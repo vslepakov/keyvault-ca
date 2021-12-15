@@ -73,10 +73,16 @@ namespace KeyVaultCA.Web.Controllers
         {
             using var reader = new StreamReader(Request.Body, Encoding.UTF8);
             var body = await reader.ReadToEndAsync();
-
-            // Need to handle different types of Line Breaks (e.g. Linux to this Api running on Windows
+            
+            // Need to handle different types of Line Breaks
             var tokens = body.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
-            return string.Join("", tokens.Skip(1).Take(tokens.Length - 3));
+            
+            if(tokens.Length > 1)
+            {
+                return string.Join("", tokens.Skip(1).Take(tokens.Length - 3));
+            }
+
+            return tokens.FirstOrDefault();
         }
     }
 }
