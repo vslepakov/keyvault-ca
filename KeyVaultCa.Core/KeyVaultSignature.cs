@@ -50,9 +50,12 @@ namespace KeyVaultCa.Core
             var subjectDN = new X500DistinguishedName(subjectName);
             var request = new CertificateRequest(subjectDN, publicKey, GetRSAHashAlgorithmName(hashSizeInBits), RSASignaturePadding.Pkcs1);
 
-            // Basic constraints
-            request.CertificateExtensions.Add(
-                new X509BasicConstraintsExtension(caCert, caCert, 0, true));
+            var pathLengthConstraint = 0;
+            if(caCert)
+            {
+                pathLengthConstraint = 1;
+            }
+            request.CertificateExtensions.Add(new X509BasicConstraintsExtension(caCert, caCert, pathLengthConstraint, true));
 
             // Subject Key Identifier
             var ski = new X509SubjectKeyIdentifierExtension(

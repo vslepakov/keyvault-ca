@@ -19,13 +19,13 @@ namespace KeyVaultCA.Web.Controllers
 
         private readonly ILogger<EstController> _logger;
         private readonly IKeyVaultCertificateProvider _keyVaultCertProvider;
-        private readonly CAConfiguration _confuguration;
+        private readonly CAConfiguration _configuration;
 
-        public EstController(ILogger<EstController> logger, IKeyVaultCertificateProvider keyVaultCertProvider, CAConfiguration confuguration)
+        public EstController(ILogger<EstController> logger, IKeyVaultCertificateProvider keyVaultCertProvider, CAConfiguration configuration)
         {
             _logger = logger;
             _keyVaultCertProvider = keyVaultCertProvider;
-            _confuguration = confuguration;
+            _configuration = configuration;
         }
 
         [HttpGet]
@@ -34,7 +34,7 @@ namespace KeyVaultCA.Web.Controllers
         [Route("ca/.well-known/est/cacerts")]
         public async Task<IActionResult> GetCACertsAsync()
         {
-            var caCerts = await _keyVaultCertProvider.GetPublicCertificatesByName(new [] { _confuguration.IssuingCA });
+            var caCerts = await _keyVaultCertProvider.GetPublicCertificatesByName(new [] { _configuration.IssuingCA });
             var pkcs7 = EncodeCertificatesAsPkcs7(caCerts.ToArray());
 
             return Content(pkcs7, PKCS7_MIME_TYPE);
@@ -52,7 +52,7 @@ namespace KeyVaultCA.Web.Controllers
             var caCert = Request.Path.StartsWithSegments("/ca");
 
             var cert = await _keyVaultCertProvider.SigningRequestAsync(
-                Convert.FromBase64String(cleanedUpBody), _confuguration.IssuingCA, _confuguration.CertValidityInDays, caCert);
+                Convert.FromBase64String(cleanedUpBody), _configuration.IssuingCA, _configuration.CertValidityInDays, caCert);
 
             var pkcs7 = EncodeCertificatesAsPkcs7(new[] { cert });
             return Content(pkcs7, PKCS7_MIME_TYPE);
@@ -79,7 +79,7 @@ namespace KeyVaultCA.Web.Controllers
             
             if(tokens.Length > 1)
             {
-                return string.Join("", tokens.Skip(1).Take(tokens.Length - 3));
+                return string.Join("", tokens);
             }
 
             return tokens.FirstOrDefault();

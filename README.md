@@ -55,14 +55,21 @@ DISCLAIMER: NOT all of the the EST methods are implemented. It is only:
 - [/cacerts](https://tools.ietf.org/html/rfc7030#section-4.1)
 - [/simpleenroll](https://tools.ietf.org/html/rfc7030#section-4.2)
 
-The endpoints above are used by and work with Azure IoT Edge 1.2 which supports certificate enrollment via EST.  
+The endpoints above are used by and work with Azure IoT Edge 1.2 which supports certificate enrollment via EST.
+
+When calling the EST endpoints for:
+- generating the device identity certificate (needed for authenticating to the IoT Hub), use the URL like in the example - `https://example-est.azurewebsites.net/.well-known/est`
+- generating the Edge CA certificate (needed for authenticating the IoT edge modules), use `ca` as part of the URL - e.g. `https://example-est.azurewebsites.net/ca/.well-known/est`.
 
 Build and deploy (or run in container) the ```KeyVaultCA.Web``` project.  
 You need to provide the following environment variables:  
   
 1. ```Secret``` - the service principal secret to access the KeyVault (see ```YOUR_APP_SECRET``` above).  
 2. ```AppId``` - the app id of the service principal to access the KeyVault (see ```YOUR_APPID``` above).  
-3. ```KeyVaultName``` - name of your KeyVault.  
+3. ```KeyVaultUrl``` - url of your KeyVault the format depending on whether it is accessible via public or private endpoint:
+    - for a public endpoint, the format is `https://<KEYVAULT_NAME>.vault.azure.net/`
+    - for a private endpoint with Azure built-in DNS integration, the format is `https://<KEYVAULT_NAME>.privatelink.vaultcore.azure.net/`
+    - for a private endpoint with custom DNS integration, the format is `https://<KEYVAULT_NAME>.vaultcore.azure.net/`
 4. ```IssuingCA``` - name of the certificate in the KeyVault to issue your leaf certificate (same as ```NAME_OF_ROOT_CA``` above).  
 5. ```CertValidityInDays``` - specifies validity period for issued certificates.  
 6. ```AuthMode``` - Authentication mode for the EST API. Possible values are: 
