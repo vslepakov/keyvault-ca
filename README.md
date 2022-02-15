@@ -61,6 +61,10 @@ When calling the EST endpoints for:
 - generating the device identity certificate (needed for authenticating to the IoT Hub), use the url like in the example - `https://example-est.azurewebsites.net/.well-known/est`
 - generating the Edge CA certificate (needed for authenticating the IoT edge modules), use 'ca' as part of the url - e.g. `https://example-est.azurewebsites.net/ca/.well-known/est`.
 
+When calling the EST endpoints for:
+- generating the device identity certificate (needed for authenticating to the IoT Hub), use the url like in the example - `https://example-est.azurewebsites.net/.well-known/est`
+- generating the Edge CA certificate (needed for authenticating the IoT edge modules), use `ca` as part of the url - e.g. `https://example-est.azurewebsites.net/ca/.well-known/est`.
+
 Build and deploy (or run in container) the ```KeyVaultCA.Web``` project.  
 You need to provide the following environment variables:  
   
