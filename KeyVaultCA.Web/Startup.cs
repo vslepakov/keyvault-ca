@@ -11,7 +11,6 @@ using Microsoft.OpenApi.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
@@ -32,7 +31,7 @@ namespace KeyVaultCA.Web
         {
             var caConfig = new CAConfiguration();
 
-            var keyVaultServiceClient = new KeyVaultServiceClient($"https://{caConfig.KeyVaultName}.vault.azure.net/");
+            var keyVaultServiceClient = new KeyVaultServiceClient(caConfig.KeyVaultUrl);
             keyVaultServiceClient.SetAuthenticationClientCredential(caConfig.AppId, caConfig.Secret);
             var kvCertProvider = new KeyVaultCertificateProvider(keyVaultServiceClient);
 

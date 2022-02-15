@@ -1,4 +1,4 @@
-﻿using CommandLine;
+using CommandLine;
 using KeyVaultCa.Core;
 using System;
 using System.IO;
@@ -18,8 +18,8 @@ namespace KeyVaultCA
             [Option("secret", Required = true, HelpText = "Password of the AAD service principal that can access KeyVault.")]
             public string Secret { get; set; }
 
-            [Option("kvName", Required = true, HelpText = "KeyVault name")]
-            public string KeyVaultName { get; set; }
+            [Option("kvUrl", Required = true, HelpText = "Key Vault URL")]
+            public string KeyVaultUrl { get; set; }
 
             // Certificates
 
@@ -54,7 +54,7 @@ namespace KeyVaultCA
 
         private static async Task StartAsync(Options o)
         {
-            var keyVaultServiceClient = new KeyVaultServiceClient($"https://{o.KeyVaultName}.vault.azure.net/");
+            var keyVaultServiceClient = new KeyVaultServiceClient(o.KeyVaultUrl);
             keyVaultServiceClient.SetAuthenticationClientCredential(o.AppId, o.Secret);
             var kvCertProvider = new KeyVaultCertificateProvider(keyVaultServiceClient);
 
