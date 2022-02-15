@@ -79,7 +79,7 @@ namespace KeyVaultCA.Web.Controllers
             
             if(tokens.Length > 1)
             {
-                return string.Join("", tokens.Skip(1).Take(tokens.Length - 3));
+                return string.Join("", tokens);
             }
 
             return tokens.FirstOrDefault();
