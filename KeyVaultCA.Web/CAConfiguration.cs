@@ -11,7 +11,7 @@ namespace KeyVaultCA.Web
 
     public class CAConfiguration
     {
-        public string KeyVaultName => Environment.GetEnvironmentVariable("KeyVaultName");
+        public string KeyVaultUrl => Environment.GetEnvironmentVariable("KeyVaultUrl");
 
         public string AppId => Environment.GetEnvironmentVariable("AppId");
 

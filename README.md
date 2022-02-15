@@ -70,7 +70,10 @@ You need to provide the following environment variables:
   
 1. ```Secret``` - the service principal secret to access the KeyVault (see ```YOUR_APP_SECRET``` above).  
 2. ```AppId``` - the app id of the service principal to access the KeyVault (see ```YOUR_APPID``` above).  
-3. ```KeyVaultName``` - name of your KeyVault.  
+3. ```KeyVaultUrl``` - url of your KeyVault the format depending on whether it is accessible via public or private endpoint:
+    - for a public endpoint, the format is `https://<KEYVAULT_NAME>.vault.azure.net/`
+    - for a private endpoint with Azure built-in DNS integration, the format is `https://<KEYVAULT_NAME>.privatelink.vaultcore.azure.net/`
+    - for a private endpoint with custom DNS integration, the format is `https://<KEYVAULT_NAME>.vaultcore.azure.net/`
 4. ```IssuingCA``` - name of the certificate in the KeyVault to issue your leaf certificate (same as ```NAME_OF_ROOT_CA``` above).  
 5. ```CertValidityInDays``` - specifies validity period for issued certificates.  
 6. ```AuthMode``` - Authentication mode for the EST API. Possible values are: 
