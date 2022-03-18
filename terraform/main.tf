@@ -27,7 +27,7 @@ provider "azuread" {
 
 resource "random_id" "prefix" {
   byte_length = 4
-  prefix      = "m"
+  prefix      = "f"
 }
 
 locals {
@@ -40,93 +40,52 @@ resource "azurerm_resource_group" "rg" {
   location = var.location
 }
 
-resource "azuread_application" "azure-ad-app" {
-  display_name = "${local.resource_prefix}-azure-ad-app"
-  owners       = [data.azurerm_client_config.current.object_id]
-}
-
-resource "azuread_service_principal" "sp-app" {
-  application_id = azuread_application.azure-ad-app.application_id
-}
-
-# resource "azuread_service_principal_password" "sp-app-password" {
-#   display_name = "terraform-created-secret"
-#   service_principal_id = azuread_service_principal.sp-app.object_id
-# }
-
-resource "azurerm_key_vault" "keyvault-ca" {
-  name                        = "${local.resource_prefix}-keyvault-ca"
-  location                    = var.location
-  resource_group_name         = azurerm_resource_group.rg.name
-  enabled_for_disk_encryption = true
-  tenant_id                   = data.azurerm_client_config.current.tenant_id
-  purge_protection_enabled    = true
-  soft_delete_retention_days  = 7 
-
-  sku_name = "standard"
-
-  access_policy {
-    tenant_id = data.azurerm_client_config.current.tenant_id
-    object_id = data.azurerm_client_config.current.object_id
-    application_id = azuread_application.azure-ad-app.application_id
-    key_permissions = [
-      "Sign"
-    ]
-
-    certificate_permissions = [
-      "Get", "List", "Update", "Create"
-    ]
-  }
-}
-
-resource "azurerm_app_service_plan" "appserviceplan" {
-  name                = "${local.resource_prefix}-appserviceplan"
-  location            = var.location
-  resource_group_name = azurerm_resource_group.rg.name
-
-  sku {
-    tier = "Standard"
-    size = "S1"
-  }
-}
-
-resource "azurerm_app_service" "appservice" {
-  name                = "${local.resource_prefix}-appservice"
-  location            = var.location
-  resource_group_name = azurerm_resource_group.rg.name
-  app_service_plan_id = azurerm_app_service_plan.appserviceplan.id
-
-  site_config {
-    dotnet_framework_version = "v4.0"
-  }
-
-  # source_control {
-  #   repo_url           = "https://github.com/machteldbogels/keyvault-ca"
-  #   branch             = "master"
-  #   manual_integration = true
-  # }
-
-  app_settings = {
-    "AppId" = azuread_application.azure-ad-app.application_id,
-    "Secret"= #appsecret,
-    "KeyVaultUrl"= azurerm_key_vault.keyvault-ca.vault_uri,
-    "AuthMode"=var.AuthMode,
-    "EstUser"=var.EstUser,
-    "EstPassword"=var.EstPassword,
-    "IssuingCA"=#rootca,
-    "CertValidityInDays"="365"
-  }
-
-}
-
-resource "azurerm_container_registry" "acr" {
-  name                = "${local.resource_prefix}acr"
+module "keyvault" {
+  source              = "./modules/keyvault"
   resource_group_name = azurerm_resource_group.rg.name
   location            = var.location
-  sku                 = "Basic"
-
-    provisioner "local-exec" {
-        command = "az acr build --image sample/estserver:v1 --registry ${local.resource_prefix} https://github.com/machteldbogels/keyvault-ca.git --file ./KeyVaultCA.Web/Dockerfile"
-
-  }
+  resource_prefix     = local.resource_prefix
 }
+
+module "acr" {
+  source              = "./modules/acr"
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = var.location
+  resource_prefix     = local.resource_prefix
+}
+
+module "appservice" {
+  source              = "./modules/appservice"
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = var.location
+  resource_prefix     = local.resource_prefix
+  app_id              = module.keyvault.app_id
+  app_secret          = module.keyvault.app_secret
+  keyvault_url        = module.keyvault.keyvault_url
+  acr_name            = module.acr.acr_name
+  acr_login_server    = module.acr.acr_login_server
+  acr_admin_username  = module.acr.acr_admin_username
+  acr_admin_password  = module.acr.acr_admin_password
+}
+
+module "iot_hub" {
+  source              = "./modules/iot-hub"
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = var.location
+  resource_prefix     = local.resource_prefix
+  dps_root_ca_name    = var.dps_root_ca_name
+  edge_device_name    = local.edge_device_name
+}
+
+module "iot_edge" {
+  source                   = "./modules/iot-edge"
+  resource_prefix          = local.resource_prefix
+  resource_group_name      = azurerm_resource_group.rg.name
+  location                 = var.location
+  vm_user_name             = var.edge_vm_user_name
+  vm_sku                   = var.edge_vm_sku
+  dps_scope_id             = module.iot_hub.iot_dps_scope_id
+  #root_ca_certificate_path = local.root_ca_certificate_path
+  edge_vm_name             = local.edge_device_name
+}
+
