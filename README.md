@@ -33,7 +33,7 @@ You will get an output containing ```appId``` and ```password```, please note th
 1. Run the API Facade like this (feel free to use your own values for the subject):  
 ```dotnet run --appId <YOUR_APPID> --secret <YOUR_APP_SECRET> \```  
 ```--ca --subject="C=US, ST=WA, L=Redmond, O=Contoso, OU=Contoso HR, CN=Contoso Inc" \```  
-```--issuercert <NAME_OF_ROOT_CA> --kvName <KEYVAULT_NAME>```  
+```--issuercert <NAME_OF_ROOT_CA> --kvUrl <KEYVAULT_URL>```  
 
 ## Request a new device certificate
 
@@ -47,7 +47,7 @@ You will get an output containing ```appId``` and ```password```, please note th
 3. Run the API Facade and pass all required arguments:   
 ```dotnet run --appId <YOUR_APPID> --secret <YOUR_APP_SECRET> \```  
 ```--issuercert <NAME_OF_ROOT_CA> --csrPath <PATH_TO_CSR_IN_DER_FORMAT> \```  
-```--output <OUTPUT_CERTIFICATE_FILENAME> --kvName <KEYVAULT_NAME>```
+```--output <OUTPUT_CERTIFICATE_FILENAME> --kvUrl <KEYVAULT_URL>```
 
 ## Use the [EST](https://tools.ietf.org/html/rfc7030) Facade to request a certificate
 

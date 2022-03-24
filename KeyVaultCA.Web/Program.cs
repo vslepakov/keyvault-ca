@@ -20,7 +20,7 @@ namespace KeyVaultCA.Web
                     {
                         var caConfig = new CAConfiguration();
 
-                        if(caConfig.AuthMode == AuthMode.x509)
+                        if (caConfig.AuthMode == AuthMode.x509)
                         {
                             o.ConfigureHttpsDefaults(o => o.ClientCertificateMode = ClientCertificateMode.RequireCertificate);
                         }

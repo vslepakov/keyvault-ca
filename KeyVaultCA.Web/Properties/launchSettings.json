@@ -16,7 +16,7 @@
       "environmentVariables": {
         "IssuingCA": "ContosoRootCA",
         "Secret": "",
-        "KeyVaultName": "",
+        "KeyVaultUrl": "",
         "CertValidityInDays": "365",
         "ASPNETCORE_ENVIRONMENT": "Development",
         "AppId": "",
@@ -42,7 +42,7 @@
       "environmentVariables": {
         "IssuingCA": "ContosoRootCA",
         "Secret": "",
-        "KeyVaultName": "",
+        "KeyVaultUrl": "",
         "CertValidityInDays": "365",
         "ASPNETCORE_ENVIRONMENT": "Development",
         "AppId": "",

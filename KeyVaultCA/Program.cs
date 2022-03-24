@@ -1,5 +1,6 @@
 using CommandLine;
 using KeyVaultCa.Core;
+using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -54,24 +55,40 @@ namespace KeyVaultCA
 
         private static async Task StartAsync(Options o)
         {
+            using var loggerFactory = LoggerFactory.Create(builder =>
+            {
+                builder
+                    .AddFilter("Microsoft", LogLevel.Warning)
+                    .AddFilter("System", LogLevel.Warning)
+                    .AddFilter("KeyVaultCa.Program", LogLevel.Information)
+                    .AddFilter("KeyVaultCa.Core", LogLevel.Information)
+                    .AddConsole();
+            });
+
+            ILogger logger = loggerFactory.CreateLogger<Program>();
+            logger.LogInformation("KeyVaultCA app started.");
+
             var keyVaultServiceClient = new KeyVaultServiceClient(o.KeyVaultUrl);
             keyVaultServiceClient.SetAuthenticationClientCredential(o.AppId, o.Secret);
-            var kvCertProvider = new KeyVaultCertificateProvider(keyVaultServiceClient);
+            var kvCertProvider = new KeyVaultCertificateProvider(keyVaultServiceClient, loggerFactory.CreateLogger<KeyVaultCertificateProvider>());
 
             if (o.IsRootCA)
             {
                 if (string.IsNullOrEmpty(o.Subject))
                 {
+                    logger.LogError("Certificate subject is not provided.");
                     throw new ArgumentException("Subject is not provided.");
                 }
                     
                 // Generate issuing certificate in KeyVault
                 await kvCertProvider.CreateCACertificateAsync(o.IssuerCertName, o.Subject);
+                logger.LogInformation("CA certificate was created successfully and can be found in the Key Vault {kvUrl}.", o.KeyVaultUrl);
             }
             else
             {
                 if(string.IsNullOrEmpty(o.PathToCsr) || string.IsNullOrEmpty(o.OutputFileName))
                 {
+                    logger.LogError("Path to CSR or the Output Filename is not provided.");
                     throw new ArgumentException("Path to CSR or the Output Filename is not provided.");
                 }
 
@@ -80,6 +97,7 @@ namespace KeyVaultCA
                 var cert = await kvCertProvider.SigningRequestAsync(csr, o.IssuerCertName, 365);
 
                 File.WriteAllBytes(o.OutputFileName, cert.Export(System.Security.Cryptography.X509Certificates.X509ContentType.Cert));
+                logger.LogInformation("Device certificate was created successfully.");
             }
         }
     }
