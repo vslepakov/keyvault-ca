@@ -1,6 +1,9 @@
+using KeyVaultCA.Web.Auth;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Https;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+using System.IO;
 
 namespace KeyVaultCA.Web
 {
@@ -13,16 +16,22 @@ namespace KeyVaultCA.Web
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
+                .ConfigureAppConfiguration(config =>
+                {
+                    config.SetBasePath(Directory.GetCurrentDirectory())
+                          .AddJsonFile("appsettings.json", optional: true)
+                          .AddEnvironmentVariables()
+                          .AddCommandLine(args);
+                })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
-                    webBuilder.ConfigureKestrel(o =>
+                    webBuilder.ConfigureKestrel((context, options) =>
                     {
-                        var caConfig = new CAConfiguration();
-
-                        if (caConfig.AuthMode == AuthMode.x509)
+                        var estAuthentication = context.Configuration.GetSection("EstAuthentication").Get<AuthConfiguration>();
+                        if (estAuthentication.AuthMode == AuthMode.x509)
                         {
-                            o.ConfigureHttpsDefaults(o => o.ClientCertificateMode = ClientCertificateMode.RequireCertificate);
+                            options.ConfigureHttpsDefaults(o => o.ClientCertificateMode = ClientCertificateMode.RequireCertificate);
                         }
                     });
                 });

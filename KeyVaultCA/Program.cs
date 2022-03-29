@@ -1,5 +1,5 @@
-using CommandLine;
 using KeyVaultCa.Core;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
@@ -9,52 +9,23 @@ namespace KeyVaultCA
 {
     class Program
     {
-        public class Options
+        static async Task Main(string[] args)
         {
-            // General options for the KeyVault access
+            IConfiguration config = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: true)
+                .AddCommandLine(args)
+                .AddEnvironmentVariables()
+                .Build();
 
-            [Option("appId", Required = true, HelpText = "AppId of the AAD service principal that can access KeyVault.")]
-            public string AppId { get; set; }
-
-            [Option("secret", Required = true, HelpText = "Password of the AAD service principal that can access KeyVault.")]
-            public string Secret { get; set; }
-
-            [Option("kvUrl", Required = true, HelpText = "Key Vault URL")]
-            public string KeyVaultUrl { get; set; }
-
-            // Certificates
-
-            [Option("issuercert", Required = true, HelpText = "Name of the issuing certificate in KeyVault.")]
-            public string IssuerCertName { get; set; }
-
-            // Options for the end entity certificate
-
-            [Option("csrPath", Required = false, HelpText = "Path to the CSR file in .der format")]
-            public string PathToCsr { get; set; }
-
-            [Option("output", Required = false, HelpText = "Output file name for the certificate")]
-            public string OutputFileName { get; set; }
-
-            // Options for Root CA creation
-
-            [Option("ca", Required = false, HelpText = "Should register Root CA")]
-            public bool IsRootCA { get; set; }
-
-            [Option("subject", Required = false, HelpText = "Subject in the format 'C=US, ST=WA, L=Redmond, O=Contoso, OU=Contoso HR, CN=Contoso Inc'")]
-            public string Subject { get; set; }
+            await CreateCertificate(config);
         }
 
-        static void Main(string[] args)
+        private static async Task CreateCertificate(IConfiguration config)
         {
-            Parser.Default.ParseArguments<Options>(args)
-                   .WithParsed(o =>
-                   {
-                       StartAsync(o).Wait();
-                   });
-        }
+            var estConfig = config.GetSection("KeyVault").Get<EstConfiguration>();
+            var csrConfig = config.GetSection("Csr").Get<CsrConfiguration>();  
 
-        private static async Task StartAsync(Options o)
-        {
             using var loggerFactory = LoggerFactory.Create(builder =>
             {
                 builder
@@ -68,35 +39,34 @@ namespace KeyVaultCA
             ILogger logger = loggerFactory.CreateLogger<Program>();
             logger.LogInformation("KeyVaultCA app started.");
 
-            var keyVaultServiceClient = new KeyVaultServiceClient(o.KeyVaultUrl);
-            keyVaultServiceClient.SetAuthenticationClientCredential(o.AppId, o.Secret);
+            var keyVaultServiceClient = new KeyVaultServiceClient(estConfig, loggerFactory.CreateLogger<KeyVaultServiceClient>());
             var kvCertProvider = new KeyVaultCertificateProvider(keyVaultServiceClient, loggerFactory.CreateLogger<KeyVaultCertificateProvider>());
 
-            if (o.IsRootCA)
+            if (csrConfig.IsRootCA)
             {
-                if (string.IsNullOrEmpty(o.Subject))
+                if (string.IsNullOrEmpty(csrConfig.Subject))
                 {
                     logger.LogError("Certificate subject is not provided.");
-                    throw new ArgumentException("Subject is not provided.");
+                    Environment.Exit(0);
                 }
-                    
+
                 // Generate issuing certificate in KeyVault
-                await kvCertProvider.CreateCACertificateAsync(o.IssuerCertName, o.Subject);
-                logger.LogInformation("CA certificate was created successfully and can be found in the Key Vault {kvUrl}.", o.KeyVaultUrl);
+                await kvCertProvider.CreateCACertificateAsync(estConfig.IssuingCA, csrConfig.Subject);
+                logger.LogInformation("CA certificate was created successfully and can be found in the Key Vault {kvUrl}.", estConfig.KeyVaultUrl);
             }
             else
             {
-                if(string.IsNullOrEmpty(o.PathToCsr) || string.IsNullOrEmpty(o.OutputFileName))
+                if (string.IsNullOrEmpty(csrConfig.PathToCsr) || string.IsNullOrEmpty(csrConfig.OutputFileName))
                 {
                     logger.LogError("Path to CSR or the Output Filename is not provided.");
-                    throw new ArgumentException("Path to CSR or the Output Filename is not provided.");
+                    Environment.Exit(0);
                 }
 
                 // Issue device certificate
-                var csr = File.ReadAllBytes(o.PathToCsr);
-                var cert = await kvCertProvider.SigningRequestAsync(csr, o.IssuerCertName, 365);
+                var csr = File.ReadAllBytes(csrConfig.PathToCsr);
+                var cert = await kvCertProvider.SigningRequestAsync(csr, estConfig.IssuingCA, 365);
 
-                File.WriteAllBytes(o.OutputFileName, cert.Export(System.Security.Cryptography.X509Certificates.X509ContentType.Cert));
+                File.WriteAllBytes(csrConfig.OutputFileName, cert.Export(System.Security.Cryptography.X509Certificates.X509ContentType.Cert));
                 logger.LogInformation("Device certificate was created successfully.");
             }
         }

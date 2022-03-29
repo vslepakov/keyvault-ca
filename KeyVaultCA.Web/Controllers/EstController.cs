@@ -19,9 +19,9 @@ namespace KeyVaultCA.Web.Controllers
 
         private readonly ILogger _logger;
         private readonly IKeyVaultCertificateProvider _keyVaultCertProvider;
-        private readonly CAConfiguration _configuration;
+        private readonly EstConfiguration _configuration;
 
-        public EstController(ILogger<EstController> logger, IKeyVaultCertificateProvider keyVaultCertProvider, CAConfiguration configuration)
+        public EstController(ILogger<EstController> logger, IKeyVaultCertificateProvider keyVaultCertProvider, EstConfiguration configuration)
         {
             _logger = logger;
             _keyVaultCertProvider = keyVaultCertProvider;

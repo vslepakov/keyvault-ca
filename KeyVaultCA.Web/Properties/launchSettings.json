@@ -14,15 +14,7 @@
       "launchBrowser": true,
       "launchUrl": "swagger",
       "environmentVariables": {
-        "IssuingCA": "ContosoRootCA",
-        "Secret": "",
-        "KeyVaultUrl": "",
-        "CertValidityInDays": "365",
-        "ASPNETCORE_ENVIRONMENT": "Development",
-        "AppId": "",
-        "EstPassword": "",
-        "EstUser": "",
-        "AuthMode": "Basic"
+        "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
     "KeyVaultCA.Web": {
@@ -40,15 +32,7 @@
       "launchBrowser": true,
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/swagger",
       "environmentVariables": {
-        "IssuingCA": "ContosoRootCA",
-        "Secret": "",
-        "KeyVaultUrl": "",
-        "CertValidityInDays": "365",
-        "ASPNETCORE_ENVIRONMENT": "Development",
-        "AppId": "",
-        "EstPassword": "",
-        "EstUser": "",
-        "AuthMode": "Basic"
+        "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "publishAllPorts": true,
       "httpPort": 49153,
