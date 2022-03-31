@@ -47,7 +47,7 @@ namespace KeyVaultCA
                 if (string.IsNullOrEmpty(csrConfig.Subject))
                 {
                     logger.LogError("Certificate subject is not provided.");
-                    Environment.Exit(0);
+                    Environment.Exit(1);
                 }
 
                 // Generate issuing certificate in KeyVault
@@ -59,7 +59,7 @@ namespace KeyVaultCA
                 if (string.IsNullOrEmpty(csrConfig.PathToCsr) || string.IsNullOrEmpty(csrConfig.OutputFileName))
                 {
                     logger.LogError("Path to CSR or the Output Filename is not provided.");
-                    Environment.Exit(0);
+                    Environment.Exit(1);
                 }
 
                 // Issue device certificate

@@ -36,13 +36,14 @@ The following common block must be filled in, for all usages of the projects.
     "IssuingCA": "<Name of the issuing certificate in KeyVault.>"
   }
 ```
+For overriding settings from command line arguments on Linux, use a syntax similar to `KeyVault__KeyVaultUrl` and for Windows, `KeyVault:KeyVaultUrl`.
 
 # Use the Console application
 ## Generate a new Root CA in Key Vault
 
 1. Run the API Facade like this (feel free to use your own values for the subject):  
 ```cd KeyVaultCA```  
-```dotnet run --IsRootCA "true" --Subject "C=US, ST=WA, L=Redmond, O=Contoso, OU=Contoso HR, CN=Contoso Inc"```   
+```dotnet run --Csr:IsRootCA "true" --Subject "C=US, ST=WA, L=Redmond, O=Contoso, OU=Contoso HR, CN=Contoso Inc"``` 
 
 ## Request a new device certificate
 
@@ -55,7 +56,7 @@ The following common block must be filled in, for all usages of the projects.
 
 3. Run the API Facade and pass all required arguments:   
 ```cd KeyVaultCA```  
-```dotnet run --IsRootCA "false" --PathToCsr <PATH_TO_CSR_IN_DER_FORMAT> --OutputFileName <OUTPUT_CERTIFICATE_FILENAME>```
+```dotnet run --Csr:IsRootCA "false" --Csr:PathToCsr <PATH_TO_CSR_IN_DER_FORMAT> --Csr:OutputFileName <OUTPUT_CERTIFICATE_FILENAME>```
 
 If desired, values can also be set in the `Csr` block of the `appsettings.json`.
 ```
@@ -104,4 +105,4 @@ Refer to [this repo](https://github.com/arlotito/iot-edge-1.2-tpm) for details o
 
 The `KeyVaultCA` console app uses a Console logger, for which the severity can be changed in the `appsettings.json`.
 
-The `KeyVaultCA.Web` writes logs to an Azure Application Insights instance, for which the connection string must be added in the `appsettings.json`. Additionally, the logging must be turned on from the Azure portal by going to the Web App and to the Application Insights settings.
+The `KeyVaultCA.Web` writes logs to an Azure Application Insights instance, for which the connection string must be added in the `appsettings.json`. Additionally, the logging must be turned on from the Azure portal by going to the Web App and into the Application Insights settings.
