@@ -29,23 +29,27 @@ namespace KeyVaultCA.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            var caConfig = new CAConfiguration();
+            services.AddApplicationInsightsTelemetry();
 
-            var keyVaultServiceClient = new KeyVaultServiceClient(caConfig.KeyVaultUrl);
-            keyVaultServiceClient.SetAuthenticationClientCredential(caConfig.AppId, caConfig.Secret);
-            var kvCertProvider = new KeyVaultCertificateProvider(keyVaultServiceClient);
+            var estConfig = Configuration.GetSection("KeyVault").Get<EstConfiguration>();
+            services.AddSingleton(estConfig);
+
+            var estAuth = Configuration.GetSection("EstAuthentication").Get<AuthConfiguration>();
+            services.AddSingleton(estAuth);
+
+            services.AddSingleton<KeyVaultServiceClient>();
+            services.AddSingleton<IKeyVaultCertificateProvider, KeyVaultCertificateProvider>();
 
             services.AddControllers();
-            services.AddSingleton<IKeyVaultCertificateProvider>(kvCertProvider);
-            services.AddSingleton(caConfig);
+
             services.AddScoped<IUserService, UserService>();
 
-            if (caConfig.AuthMode == AuthMode.Basic)
+            if (estAuth.AuthMode == AuthMode.Basic)
             {
                 services.AddAuthentication("BasicAuthentication")
                     .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("BasicAuthentication", null);
             }
-            else if(caConfig.AuthMode == AuthMode.x509)
+            else if (estAuth.AuthMode == AuthMode.x509)
             {
                 services.AddAuthentication(CertificateAuthenticationDefaults.AuthenticationScheme)
                    .AddCertificate(options =>
