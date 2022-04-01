@@ -115,16 +115,14 @@ resource "azurerm_linux_virtual_machine" "iot_edge" {
     azurerm_network_interface.iot_edge.id
   ]
 
-  # custom_data = base64encode(templatefile("${path.module}/cloud-init.template.yaml", {
-  #   "IDENTITY_CERTIFICATE"     = (replace(shell_script.create_iot_edge_config.output["identity_certificate"], "\n", "\n\n")) # need to convert newlines to double newlines for yaml double quoted multiline string to handle them
-  #   "IDENTITY_CERTIFICATE_KEY" = (replace(shell_script.create_iot_edge_config.output["identity_certificate_key"], "\n", "\n\n"))
-  #   "CA_CERTIFICATE"           = (replace(shell_script.create_iot_edge_config.output["ca_certificate"], "\n", "\n\n"))
-  #   "CA_CERTIFICATE_KEY"       = (replace(shell_script.create_iot_edge_config.output["ca_certificate_key"], "\n", "\n\n"))
-  #   "ROOT_CA_CERTIFICATE"      = replace(file(var.root_ca_certificate_path), "\n", "\n\n")
-  #   "SCOPE_ID"                 = var.dps_scope_id
-  #   "REGISTRATION_ID"          = var.edge_vm_name
-  #   "HOSTNAME"                 = var.edge_vm_name
-  # }))
+  custom_data = base64encode(templatefile("modules/iot-edge/cloud-init.template.yaml", {
+    "SCOPE_ID"                 = var.dps_scope_id
+    "DEVICE_ID"                = var.edge_vm_name
+    "HOSTNAME"                 = var.edge_vm_name
+    "EST_HOSTNAME"             = var.app_hostname
+    "EST_USERNAME"             = var.est_user
+    "EST_PASSWORD"             = var.est_password
+  }))
 
   source_image_reference {
     offer     = "UbuntuServer"

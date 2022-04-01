@@ -383,3 +383,7 @@ override.tf.json
 # Ignore .terraform.lock.hcl
 .terraform.lock.hcl
 .ssh/id_rsa
+
+# certs
+.csr
+.key

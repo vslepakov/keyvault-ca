@@ -32,6 +32,8 @@ resource "random_id" "prefix" {
 
 locals {
   resource_prefix          = var.resource_prefix == "" ? lower(random_id.prefix.hex) : var.resource_prefix
+  issuing_ca               = "${local.resource_prefix}-ca"
+  root_ca_certificate_path = var.root_ca_certificate_path == "" ? "${path.module}/../certs/gen/certs/azure-iot-test-only.root.ca.cert.pem" : var.root_ca_certificate_path
   edge_device_name         = "${local.resource_prefix}-edge-device"
 }
 
@@ -61,6 +63,7 @@ module "appservice" {
   resource_prefix     = local.resource_prefix
   app_id              = module.keyvault.app_id
   app_secret          = module.keyvault.app_secret
+  issuing_ca          = local.issuing_ca
   keyvault_url        = module.keyvault.keyvault_url
   acr_name            = module.acr.acr_name
   acr_login_server    = module.acr.acr_login_server
@@ -87,5 +90,36 @@ module "iot_edge" {
   dps_scope_id             = module.iot_hub.iot_dps_scope_id
   #root_ca_certificate_path = local.root_ca_certificate_path
   edge_vm_name             = local.edge_device_name
+  app_hostname             = module.appservice.app_hostname
+  est_user                 = module.appservice.est_user
+  est_password             = module.appservice.est_password
 }
 
+resource "null_resource" "run-api-facade" {
+  provisioner "local-exec" {
+          working_dir = "../KeyVaultCA"
+          command = "dotnet run --appId ${module.keyvault.app_id} --secret ${module.keyvault.app_secret} --ca --subject ${"C=US, ST=WA, L=Redmond, O=Contoso, OU=Contoso HR, CN=Contoso Inc"} --issuercert ${local.issuing_ca} --kvUrl ${module.keyvault.keyvault_url}"
+    }
+
+  provisioner "local-exec" {
+          working_dir = "../KeyVaultCA"
+          command = "openssl genrsa -out ${local.resource_prefix}.key 2048"
+  }
+
+  provisioner "local-exec" {
+          working_dir = "../KeyVaultCA"
+          command = "openssl req -new -key ${local.resource_prefix}.key -subj \"/C=US/ST=WA/L=Redmond/O=Contoso/CN=Contoso In\" -out ${local.resource_prefix}.csr"
+          interpreter = ["PowerShell", "-Command"]
+  }
+
+  provisioner "local-exec" {
+          working_dir = "../KeyVaultCA"
+          command = "openssl req -in ${local.resource_prefix}.csr -out ${local.resource_prefix}.csr.der -outform DER"
+  }
+
+  provisioner "local-exec" {
+          working_dir = "../KeyVaultCA"
+          command = "dotnet run --appId ${module.keyvault.app_id} --secret ${module.keyvault.app_secret} --issuercert ${local.resource_prefix}-ca --csrPath ${local.resource_prefix}.csr.der --output ${local.resource_prefix}-cert --kvUrl ${module.keyvault.keyvault_url}"
+    }
+
+}

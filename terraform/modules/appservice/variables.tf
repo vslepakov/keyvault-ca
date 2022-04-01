@@ -41,7 +41,6 @@ variable "est_password" {
 
 variable "issuing_ca" {
   type = string
-  default = "mjjbrootca"
 }
 
 variable "cert_validity_in_days" {

@@ -1,3 +1,11 @@
+resource "azurerm_application_insights" "appinsights" {
+  name                = "${var.resource_prefix}-appinsights"
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  application_type    = "web"
+}
+
+
 resource "azurerm_app_service_plan" "appserviceplan" {
   name                = "${var.resource_prefix}-appserviceplan"
   location            = var.location
@@ -22,6 +30,10 @@ resource "azurerm_app_service" "appservice" {
     linux_fx_version         = "DOCKER|${var.acr_name}.azurecr.io/sample/estserver:v2"
   }
 
+  identity {
+    type = "SystemAssigned"
+  }
+
   app_settings = {
     WEBSITES_ENABLE_APP_SERVICE_STORAGE = false
     "AppId" = var.app_id
@@ -35,5 +47,7 @@ resource "azurerm_app_service" "appservice" {
     "DOCKER_REGISTRY_SERVER_URL"= "https://${var.acr_login_server}"
     "DOCKER_REGISTRY_SERVER_USERNAME"= var.acr_admin_username
     "DOCKER_REGISTRY_SERVER_PASSWORD"= var.acr_admin_password #Add to keyvault
+    "APPINSIGHTS_INSTRUMENTATIONKEY" = azurerm_application_insights.appinsights.instrumentation_key
+    "APPLICATIONINSIGHTS_CONNECTION_STRING" = azurerm_application_insights.appinsights.connection_string
   }
 }

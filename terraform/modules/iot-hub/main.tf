@@ -8,8 +8,6 @@ terraform {
   }
 }
 
-#provider "shell" {}
-
 data "azurerm_subscription" "current" {
 }
 

@@ -30,3 +30,15 @@ variable "dps_scope_id" {
 variable "edge_vm_name" {
   type = string
 }
+
+variable "app_hostname" {
+  type = string
+}
+
+variable "est_user" {
+  type    = string
+}
+
+variable "est_password" {
+  type    = string
+}
