@@ -1,4 +1,4 @@
-![CI build](https://github.com/syedhassaanahmed/keyvault-ca/actions/workflows/ci.yml/badge.svg)
+![CI build](https://github.com/vslepakov/keyvault-ca/actions/workflows/ci.yml/badge.svg)
 
 # Some Context
 
