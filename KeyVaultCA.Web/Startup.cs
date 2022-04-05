@@ -1,3 +1,4 @@
+using Azure.Identity;
 using KeyVaultCa.Core;
 using KeyVaultCA.Web.Auth;
 using Microsoft.AspNetCore.Authentication;
@@ -37,6 +38,8 @@ namespace KeyVaultCA.Web
             var estAuth = Configuration.GetSection("EstAuthentication").Get<AuthConfiguration>();
             services.AddSingleton(estAuth);
 
+            var azureCredential = new DefaultAzureCredential();
+            services.AddSingleton(azureCredential);
             services.AddSingleton<KeyVaultServiceClient>();
             services.AddSingleton<IKeyVaultCertificateProvider, KeyVaultCertificateProvider>();
 

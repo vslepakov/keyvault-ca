@@ -1,3 +1,4 @@
+using Azure.Identity;
 using KeyVaultCa.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -39,7 +40,7 @@ namespace KeyVaultCA
             ILogger logger = loggerFactory.CreateLogger<Program>();
             logger.LogInformation("KeyVaultCA app started.");
 
-            var keyVaultServiceClient = new KeyVaultServiceClient(estConfig, loggerFactory.CreateLogger<KeyVaultServiceClient>());
+            var keyVaultServiceClient = new KeyVaultServiceClient(estConfig, new DefaultAzureCredential(),loggerFactory.CreateLogger<KeyVaultServiceClient>());
             var kvCertProvider = new KeyVaultCertificateProvider(keyVaultServiceClient, loggerFactory.CreateLogger<KeyVaultCertificateProvider>());
 
             if (csrConfig.IsRootCA)
