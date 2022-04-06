@@ -1,3 +1,5 @@
+![CI build](https://github.com/vslepakov/keyvault-ca/actions/workflows/ci.yml/badge.svg)
+
 # Some Context
 
 Please refer to [this blog post](https://vslepakov.medium.com/build-a-lightweight-pki-for-iot-using-azure-keyvault-acc46bce26ed) for details.  
