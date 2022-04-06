@@ -51,7 +51,7 @@ namespace KeyVaultCa.Core
             var request = new CertificateRequest(subjectDN, publicKey, GetRSAHashAlgorithmName(hashSizeInBits), RSASignaturePadding.Pkcs1);
 
             var pathLengthConstraint = 0;
-            if(caCert)
+            if (caCert)
             {
                 pathLengthConstraint = 1;
             }
@@ -227,102 +227,6 @@ namespace KeyVaultCa.Core
                 writer.PopSequence();
                 return new X509Extension("2.5.29.35", writer.Encode(), false);
             }
-        }
-    }
-    /// <summary>
-    /// The X509 signature generator to sign a digest with a KeyVault key.
-    /// </summary>
-    public class KeyVaultSignatureGenerator : X509SignatureGenerator
-    {
-        private X509Certificate2 _issuerCert;
-        private KeyVaultServiceClient _keyVaultServiceClient;
-        private readonly string _signingKey;
-
-        /// <summary>
-        /// Create the KeyVault signature generator.
-        /// </summary>
-        /// <param name="keyVaultServiceClient">The KeyVault service client to use</param>
-        /// <param name="signingKey">The KeyVault signing key</param>
-        /// <param name="issuerCertificate">The issuer certificate used for signing</param>
-        public KeyVaultSignatureGenerator(
-            KeyVaultServiceClient keyVaultServiceClient,
-            string signingKey,
-            X509Certificate2 issuerCertificate)
-        {
-            _issuerCert = issuerCertificate;
-            _keyVaultServiceClient = keyVaultServiceClient;
-            _signingKey = signingKey;
-        }
-
-        /// <summary>
-        /// Callback to sign a digest with KeyVault key.
-        /// </summary>
-        /// <param name="data"></param>
-        /// <param name="hashAlgorithm"></param>
-        /// <returns></returns>
-        public override byte[] SignData(byte[] data, HashAlgorithmName hashAlgorithm)
-        {
-            HashAlgorithm hash;
-            if (hashAlgorithm == HashAlgorithmName.SHA256)
-            {
-                hash = SHA256.Create();
-            }
-            else if (hashAlgorithm == HashAlgorithmName.SHA384)
-            {
-                hash = SHA384.Create();
-            }
-            else if (hashAlgorithm == HashAlgorithmName.SHA512)
-            {
-                hash = SHA512.Create();
-            }
-            else
-            {
-                throw new ArgumentOutOfRangeException(nameof(hashAlgorithm), "The hash algorithm " + hashAlgorithm.Name + " is not supported.");
-            }
-            var digest = hash.ComputeHash(data);
-            var resultKeyVaultPkcs = _keyVaultServiceClient.SignDigestAsync(_signingKey, digest, hashAlgorithm, RSASignaturePadding.Pkcs1).GetAwaiter().GetResult();
-            return resultKeyVaultPkcs;
-        }
-
-        protected override PublicKey BuildPublicKey()
-        {
-            return _issuerCert.PublicKey;
-        }
-
-        internal static PublicKey BuildPublicKey(RSA rsa)
-        {
-            if (rsa == null)
-            {
-                throw new ArgumentNullException(nameof(rsa));
-            }
-            // function is never called
-            return null;
-        }
-
-        public override byte[] GetSignatureAlgorithmIdentifier(HashAlgorithmName hashAlgorithm)
-        {
-            byte[] oidSequence;
-
-            if (hashAlgorithm == HashAlgorithmName.SHA256)
-            {
-                //const string RsaPkcs1Sha256 = "1.2.840.113549.1.1.11";
-                oidSequence = new byte[] { 48, 13, 6, 9, 42, 134, 72, 134, 247, 13, 1, 1, 11, 5, 0 };
-            }
-            else if (hashAlgorithm == HashAlgorithmName.SHA384)
-            {
-                //const string RsaPkcs1Sha384 = "1.2.840.113549.1.1.12";
-                oidSequence = new byte[] { 48, 13, 6, 9, 42, 134, 72, 134, 247, 13, 1, 1, 12, 5, 0 };
-            }
-            else if (hashAlgorithm == HashAlgorithmName.SHA512)
-            {
-                //const string RsaPkcs1Sha512 = "1.2.840.113549.1.1.13";
-                oidSequence = new byte[] { 48, 13, 6, 9, 42, 134, 72, 134, 247, 13, 1, 1, 13, 5, 0 };
-            }
-            else
-            {
-                throw new ArgumentOutOfRangeException(nameof(hashAlgorithm), "The hash algorithm " + hashAlgorithm.Name + " is not supported.");
-            }
-            return oidSequence;
         }
     }
 }

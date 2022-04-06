@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: 6.0.x
+
+    - name: .NET Restore
+      run: dotnet restore
+    - name: .NET Build
+      run: dotnet build --no-restore
+    - name: .NET Test
+      run: dotnet test --no-build --verbosity normal
+
+    - name: Docker Build
+      run: docker build . -f ./KeyVaultCA.Web/Dockerfile -t keyvault-ca-web:$(date +%s)
