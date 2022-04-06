@@ -7,7 +7,7 @@ apt:
       source: "deb https://packages.microsoft.com/ubuntu/18.04/multiarch/prod bionic main"
       key: |
         -----BEGIN PGP PUBLIC KEY BLOCK-----
-        Version: GnuPG v1.4.7 (GNU/Linux)
+        Version : GnuPG v1.4.7 (GNU/Linux)
 
         mQENBFYxWIwBCADAKoZhZlJxGNGWzqV+1OG1xiQeoowKhssGAKvd+buXCGISZJwT
         LXZqIcIiLP7pqdcZWtE9bSc7yBY2MalDp9Liu0KekywQ6VVX1T72NPf5Ev6x6DLV
@@ -40,26 +40,25 @@ write_files:
       auto_reprovisioning_mode = "AlwaysOnStartup"
 
       [provisioning]
-      source: "dps"
-      global_endpoint: "https://global.azure-devices-provisioning.net"
-      id_scope: "${SCOPE_ID}"
+      source = "dps"
+      global_endpoint= "https://global.azure-devices-provisioning.net"
+      id_scope= "${SCOPE_ID}"
 
       [provisioning.attestation]
-      attestation:
-        method: "x509"
-        registration_id: "${DEVICE_ID}"
+      method = "x509"
+      registration_id = "${DEVICE_ID}"
 
       [provisioning.attestation.identity_cert]
       method = "est"
       common_name = "${DEVICE_ID}"
-      
+      url = "https://${EST_HOSTNAME}/.well-known/est"
+
       # ==============================================================================
       # Cert issuance via EST
       # ==============================================================================
 
       [cert_issuance.est]
       trusted_certs = ["file:///etc/aziot/est-ca.pem"]
-
 
       [cert_issuance.est.auth]
       username = "${EST_USERNAME}"
@@ -91,10 +90,13 @@ write_files:
       [edge_ca]
       method = "est"
 
+      common_name = "${DEVICE_ID}"
+
       # Optional EST configuration for issuing the Edge CA certificate below.
       # If not set, the defaults in [cert_issuance.est] will be used.
-      url = "https://${EST_HOSTNAME}/ca/.well-known/est"
 
+      username = "${EST_USERNAME}"
+      password = "${EST_PASSWORD}"
 runcmd:
   - |
       set -x
@@ -104,20 +106,18 @@ runcmd:
           sleep 3
         done
 
-        sudo ln -s /dev/null /etc/systemd/system/iotedge.service
-        apt install iotedge
+        sudo apt install aziot-edge -y
         systemctl unmask iotedge
         systemctl start iotedge
 
         # Download EST CA Certificate
-        echo downloading the EST CA cert from $EST_HOSTNAME
-        openssl s_client -showcerts -connect $EST_HOSTNAME:443 </dev/null 2>/dev/null|openssl x509 -outform PEM >./est-ca.pem
+        echo downloading the EST CA cert from ${EST_HOSTNAME}
+        openssl s_client -showcerts -connect ${EST_HOSTNAME}:443 </dev/null 2>/dev/null|openssl x509 -outform PEM >./est-ca.pem
         sudo cp ./est-ca.pem /etc/aziot/
         rm ./est-ca.pem
 
         echo
         echo applying configuration to iot edge...
-        export EST_URL=https://$EST_HOSTNAME/.well-known/est
         
         sudo iotedge config apply
 

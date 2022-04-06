@@ -10,16 +10,6 @@ variable "resource_prefix" {
   type = string
 }
 
-variable "app_id" {
-  type = string
-  sensitive = true
-}
-
-variable "app_secret" {
-  type = string
-  sensitive = true
-}
-
 variable "keyvault_url" {
   type = string
 }
@@ -63,4 +53,8 @@ variable "acr_admin_username" {
 variable "acr_admin_password" {
   type = string
   sensitive = true
+}
+
+variable "keyvault_id" {
+  type = string
 }

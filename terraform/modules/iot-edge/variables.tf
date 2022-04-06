@@ -23,10 +23,6 @@ variable "dps_scope_id" {
   type = string
 }
 
-# variable "root_ca_certificate_path" {
-#   type = string
-# }
-
 variable "edge_vm_name" {
   type = string
 }

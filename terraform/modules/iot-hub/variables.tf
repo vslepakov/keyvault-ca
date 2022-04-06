@@ -10,10 +10,18 @@ variable "resource_prefix" {
   type = string
 }
 
-variable "dps_root_ca_name" {
+variable "edge_device_name" {
   type = string
 }
 
-variable "edge_device_name" {
+variable "issuing_ca" {
+  type = string
+}
+
+variable "keyvault_name" {
+  type = string
+}
+
+variable "vnet_name" {
   type = string
 }

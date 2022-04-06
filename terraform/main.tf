@@ -2,7 +2,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "=2.90.0"
+      version = "=2.98.0"
     }
     azuread = {
       source  = "hashicorp/azuread"
@@ -33,8 +33,8 @@ resource "random_id" "prefix" {
 locals {
   resource_prefix          = var.resource_prefix == "" ? lower(random_id.prefix.hex) : var.resource_prefix
   issuing_ca               = "${local.resource_prefix}-ca"
-  root_ca_certificate_path = var.root_ca_certificate_path == "" ? "${path.module}/../certs/gen/certs/azure-iot-test-only.root.ca.cert.pem" : var.root_ca_certificate_path
   edge_device_name         = "${local.resource_prefix}-edge-device"
+  certs_path               = "../Certs/${local.resource_prefix}"
 }
 
 resource "azurerm_resource_group" "rg" {
@@ -43,10 +43,10 @@ resource "azurerm_resource_group" "rg" {
 }
 
 module "keyvault" {
-  source              = "./modules/keyvault"
-  resource_group_name = azurerm_resource_group.rg.name
-  location            = var.location
-  resource_prefix     = local.resource_prefix
+  source                        = "./modules/keyvault"
+  resource_group_name           = azurerm_resource_group.rg.name
+  location                      = var.location
+  resource_prefix               = local.resource_prefix
 }
 
 module "acr" {
@@ -61,9 +61,8 @@ module "appservice" {
   resource_group_name = azurerm_resource_group.rg.name
   location            = var.location
   resource_prefix     = local.resource_prefix
-  app_id              = module.keyvault.app_id
-  app_secret          = module.keyvault.app_secret
   issuing_ca          = local.issuing_ca
+  keyvault_id         = module.keyvault.keyvault_id 
   keyvault_url        = module.keyvault.keyvault_url
   acr_name            = module.acr.acr_name
   acr_login_server    = module.acr.acr_login_server
@@ -76,8 +75,10 @@ module "iot_hub" {
   resource_group_name = azurerm_resource_group.rg.name
   location            = var.location
   resource_prefix     = local.resource_prefix
-  dps_root_ca_name    = var.dps_root_ca_name
   edge_device_name    = local.edge_device_name
+  issuing_ca          = local.issuing_ca
+  keyvault_name       = module.keyvault.keyvault_name
+  vnet_name           = module.iot_edge.vnet_name
 }
 
 module "iot_edge" {
@@ -88,7 +89,6 @@ module "iot_edge" {
   vm_user_name             = var.edge_vm_user_name
   vm_sku                   = var.edge_vm_sku
   dps_scope_id             = module.iot_hub.iot_dps_scope_id
-  #root_ca_certificate_path = local.root_ca_certificate_path
   edge_vm_name             = local.edge_device_name
   app_hostname             = module.appservice.app_hostname
   est_user                 = module.appservice.est_user
@@ -97,29 +97,27 @@ module "iot_edge" {
 
 resource "null_resource" "run-api-facade" {
   provisioner "local-exec" {
-          working_dir = "../KeyVaultCA"
-          command = "dotnet run --appId ${module.keyvault.app_id} --secret ${module.keyvault.app_secret} --ca --subject ${"C=US, ST=WA, L=Redmond, O=Contoso, OU=Contoso HR, CN=Contoso Inc"} --issuercert ${local.issuing_ca} --kvUrl ${module.keyvault.keyvault_url}"
+          working_dir = "../KeyvaultCA"
+          command = "dotnet run --Csr:IsRootCA true --Csr:Subject ${"C=US, ST=WA, L=Redmond, O=Contoso, OU=Contoso HR, CN=Contoso Inc"} --Keyvault:IssuingCA ${local.issuing_ca} --Keyvault:KeyVaultUrl ${module.keyvault.keyvault_url}"
     }
-
   provisioner "local-exec" {
           working_dir = "../KeyVaultCA"
-          command = "openssl genrsa -out ${local.resource_prefix}.key 2048"
+          command = "openssl genrsa -out ${local.certs_path}.key 2048"
   }
 
   provisioner "local-exec" {
           working_dir = "../KeyVaultCA"
-          command = "openssl req -new -key ${local.resource_prefix}.key -subj \"/C=US/ST=WA/L=Redmond/O=Contoso/CN=Contoso In\" -out ${local.resource_prefix}.csr"
+          command = "openssl req -new -key ${local.certs_path}.key -subj \"/C=US/ST=WA/L=Redmond/O=Contoso/CN=Contoso Inc\" -out ${local.certs_path}.csr"
           interpreter = ["PowerShell", "-Command"]
   }
 
   provisioner "local-exec" {
           working_dir = "../KeyVaultCA"
-          command = "openssl req -in ${local.resource_prefix}.csr -out ${local.resource_prefix}.csr.der -outform DER"
+          command = "openssl req -in ${local.certs_path}.csr -out ${local.certs_path}.csr.der -outform DER"
   }
 
   provisioner "local-exec" {
           working_dir = "../KeyVaultCA"
-          command = "dotnet run --appId ${module.keyvault.app_id} --secret ${module.keyvault.app_secret} --issuercert ${local.resource_prefix}-ca --csrPath ${local.resource_prefix}.csr.der --output ${local.resource_prefix}-cert --kvUrl ${module.keyvault.keyvault_url}"
-    }
-
+          command = "dotnet run --Csr:IsRootCA false --Keyvault:IssuingCA ${local.resource_prefix}-ca --Csr:PathToCsr ${local.certs_path}.csr.der --Csr:OutputFileName ${local.certs_path}-cert --Keyvault:IssuingCA ${local.issuing_ca} --Keyvault:KeyVaultUrl ${module.keyvault.keyvault_url}"
+  }
 }

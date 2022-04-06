@@ -54,7 +54,7 @@ resource "azurerm_virtual_network" "iot_edge" {
   address_space       = ["10.0.0.0/16"]
 
   subnet {
-    name           = "${local.dns_label_prefix}-subnet"
+    name           = "${local.dns_label_prefix}-iotedge-subnet"
     address_prefix = "10.0.1.0/24"
     security_group = azurerm_network_security_group.iot_edge.id
   }
@@ -80,22 +80,10 @@ resource "tls_private_key" "vm_ssh" {
 }
 
 resource "local_file" "ssh" {
-  content = tls_private_key.vm_ssh.private_key_pem #used to be sensitive_content but is deprecated, look into later
+  content = tls_private_key.vm_ssh.private_key_pem
   filename          = "../.ssh/id_rsa"
   file_permission   = "600"
 }
-
-# resource "shell_script" "create_iot_edge_config" {
-#   lifecycle_commands {
-#     create = "python3 ../scripts/terraform/create_and_jsonify_edge_device_certs.py"
-#     delete = "echo noop"
-#   }
-
-#   environment = {
-#     IOT_EDGE_DEVICE_NAME = var.edge_vm_name
-#     TERM                 = "xterm"
-#   }
-# }
 
 resource "azurerm_linux_virtual_machine" "iot_edge" {
   name                            = var.edge_vm_name
@@ -125,9 +113,9 @@ resource "azurerm_linux_virtual_machine" "iot_edge" {
   }))
 
   source_image_reference {
-    offer     = "UbuntuServer"
+    offer     = "0001-com-ubuntu-server-focal" #UbuntuServer does not seem to have 20.04 LTS image available (also through az vm image list)
     publisher = "Canonical"
-    sku       = "18.04-LTS"
+    sku       = "20_04-lts-gen2"
     version   = "latest"
   }
 

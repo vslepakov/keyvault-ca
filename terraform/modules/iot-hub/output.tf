@@ -31,6 +31,7 @@ output "iot_dps_scope_id" {
 output "iot_dps_name" {
   value = azurerm_iothub_dps.iot_dps.name
 }
+
 output "iot_hub_id" {
   value = azurerm_iothub.iothub.id
 }
