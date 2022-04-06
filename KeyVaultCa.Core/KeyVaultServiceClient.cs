@@ -1,14 +1,9 @@
-using Microsoft.Azure.KeyVault;
-using Microsoft.Azure.KeyVault.Models;
-using Microsoft.Azure.KeyVault.WebKey;
+using Azure;
+using Azure.Identity;
+using Azure.Security.KeyVault.Certificates;
 using Microsoft.Extensions.Logging;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
-using Microsoft.Rest.Azure;
-using Polly;
 using System;
 using System.Collections.Generic;
-using System.Net.Http;
-using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,25 +15,19 @@ namespace KeyVaultCa.Core
     /// </summary>
     public class KeyVaultServiceClient
     {
-        private readonly string _vaultBaseUrl;
-        private IKeyVaultClient _keyVaultClient;
-        private ClientCredential _clientCredential;
+        private CertificateClient _keyVaultClient;
         private readonly ILogger _logger;
-
-        //using a static http client to try to pool TCP outbound connections
-        private static HttpClient httpClient = new HttpClient();
+        public DefaultAzureCredential Credential { get; set; }
 
         /// <summary>
         /// Create the service client for KeyVault, with user or service credentials.
         /// </summary>
         /// <param name="vaultBaseUrl">The Url of the Key Vault.</param>
-        public KeyVaultServiceClient(EstConfiguration config, ILogger<KeyVaultServiceClient> logger)
+        public KeyVaultServiceClient(EstConfiguration config, DefaultAzureCredential credential, ILogger<KeyVaultServiceClient> logger)
         {
+            _keyVaultClient = new CertificateClient(new Uri(config.KeyVaultUrl), credential);
             _logger = logger;
-            _vaultBaseUrl = config.KeyVaultUrl;
-            _clientCredential = new ClientCredential(config.AppId, config.Secret);
-            _keyVaultClient = new KeyVaultClient(
-                new KeyVaultClient.AuthenticationCallback(GetAccessTokenAsync), httpClient); //using the static http client
+            Credential = credential;
         }
 
         public async Task<X509Certificate2> CreateCACertificateAsync(
@@ -53,82 +42,66 @@ namespace KeyVaultCa.Core
             try
             {
                 // delete pending operations
-                _logger.LogDebug("Deleting pending operations.");
-                await _keyVaultClient.DeleteCertificateOperationAsync(_vaultBaseUrl, id);
+                _logger.LogDebug("Deleting pending operations for certificate id {id}.", id);
+                var op = await _keyVaultClient.GetCertificateOperationAsync(id);
+                await op.DeleteAsync();
             }
             catch
             {
-                // intentionally ignore errors
+                // intentionally ignore errors 
             }
 
             string caTempCertIdentifier = null;
 
             try
             {
-                //// policy self signed, new key
+                // create policy for self signed certificate with a new key
                 var policySelfSignedNewKey = CreateCertificatePolicy(subject, keySize, true, false);
-                var tempAttributes = CreateCertificateAttributes(DateTime.UtcNow.AddMinutes(-10), DateTime.UtcNow.AddMinutes(10));
-                var createKey = await _keyVaultClient.CreateCertificateAsync(
-                    _vaultBaseUrl,
-                    id,
-                    policySelfSignedNewKey,
-                    tempAttributes,
-                    null,
-                    ct)
-                    .ConfigureAwait(false);
 
-                CertificateOperation operation;
+                var newCertificateOperation = await _keyVaultClient.StartCreateCertificateAsync(id, policySelfSignedNewKey, true, null, ct).ConfigureAwait(false);
+                await newCertificateOperation.WaitForCompletionAsync(ct).ConfigureAwait(false);
 
-                do
-                {
-                    await Task.Delay(1000);
-                    operation = await _keyVaultClient.GetCertificateOperationAsync(_vaultBaseUrl, id, ct);
-
-                } while (operation.Status == "inProgress" && !ct.IsCancellationRequested);
-
-                if (operation.Status != "completed")
+                if (!newCertificateOperation.HasCompleted)
                 {
                     _logger.LogError("Failed to create new key pair.");
                     throw new Exception("Failed to create new key pair.");
                 }
 
-                var createdCertificateBundle = await _keyVaultClient.GetCertificateAsync(_vaultBaseUrl, id).ConfigureAwait(false);
-                var caCertKeyIdentifier = createdCertificateBundle.KeyIdentifier.Identifier;
-                caTempCertIdentifier = createdCertificateBundle.CertificateIdentifier.Identifier;
+                _logger.LogDebug("Creation of temporary self signed certificate with id {id} completed.", id);
 
-                // policy unknown issuer, reuse key
+                var createdCertificateBundle = await _keyVaultClient.GetCertificateAsync(id).ConfigureAwait(false);
+                caTempCertIdentifier = createdCertificateBundle.Value.Id.ToString();
+
+                _logger.LogDebug("Temporary certificate identifier is {certIdentifier}.", caTempCertIdentifier);
+                _logger.LogDebug("Temporary certificate backing key identifier is {key}.", createdCertificateBundle.Value.KeyId);
+
+                // create policy for unknown issuer and reuse key
                 var policyUnknownReuse = CreateCertificatePolicy(subject, keySize, false, true);
-                var attributes = CreateCertificateAttributes(notBefore, notAfter);
                 var tags = CreateCertificateTags(id, false);
 
                 // create the CSR
-                var createResult = await _keyVaultClient.CreateCertificateAsync(
-                    _vaultBaseUrl,
-                    id,
-                    policyUnknownReuse,
-                    attributes,
-                    tags,
-                    ct)
-                    .ConfigureAwait(false);
+                _logger.LogDebug("Starting to create the CSR.");
+                var createResult = await _keyVaultClient.StartCreateCertificateAsync(id, policyUnknownReuse, true, tags, ct).ConfigureAwait(false);
 
-                if (createResult.Csr == null)
+                if (createResult.Properties.Csr == null)
                 {
                     throw new Exception("Failed to read CSR from CreateCertificate.");
                 }
 
                 // decode the CSR and verify consistency
-                _logger.LogInformation("Decode the CSR and verify consistency.");
-                var pkcs10CertificationRequest = new Org.BouncyCastle.Pkcs.Pkcs10CertificationRequest(createResult.Csr);
+                _logger.LogDebug("Decode the CSR and verify consistency.");
+                var pkcs10CertificationRequest = new Org.BouncyCastle.Pkcs.Pkcs10CertificationRequest(createResult.Properties.Csr);
                 var info = pkcs10CertificationRequest.GetCertificationRequestInfo();
-                if (createResult.Csr == null ||
+                if (createResult.Properties.Csr == null ||
                     pkcs10CertificationRequest == null ||
                     !pkcs10CertificationRequest.Verify())
                 {
+                    _logger.LogError("Invalid CSR.");
                     throw new Exception("Invalid CSR.");
                 }
 
-                // create the self signed root CA cert
-                _logger.LogInformation("Create the self signed root CA certificate.");
+                // create the self signed root CA certificate
+                _logger.LogDebug("Create the self signed root CA certificate.");
                 var publicKey = KeyVaultCertFactory.GetRSAPublicKey(info.SubjectPublicKeyInfo);
                 var signedcert = await KeyVaultCertFactory.CreateSignedCertificate(
                     subject,
@@ -138,21 +111,19 @@ namespace KeyVaultCa.Core
                     (ushort)hashSize,
                     null,
                     publicKey,
-                    new KeyVaultSignatureGenerator(this, createdCertificateBundle.KeyIdentifier.Identifier, null),
+                    new KeyVaultSignatureGenerator(Credential, createdCertificateBundle.Value.KeyId, null),
                     true);
 
-                // merge Root CA cert with
-                _logger.LogInformation("Merge Root CA certificate with self signed one.");
-                var mergeResult = await _keyVaultClient.MergeCertificateAsync(
-                    _vaultBaseUrl,
-                    id,
-                    new X509Certificate2Collection(signedcert));
+                // merge Root CA cert with the signed certificate
+                _logger.LogDebug("Merge Root CA certificate with the signed certificate.");
+                MergeCertificateOptions options = new MergeCertificateOptions(id, new[] { signedcert.Export(X509ContentType.Pkcs12) });
+                var mergeResult = await _keyVaultClient.MergeCertificateAsync(options);
 
                 return signedcert;
             }
-            catch (KeyVaultErrorException kex)
+            catch (Exception ex)
             {
-                _logger.LogError("Failed to create new Root CA certificate: {ex}.", kex);
+                _logger.LogError("Failed to create new Root CA certificate: {ex}.", ex);
                 throw;
             }
             finally
@@ -162,12 +133,13 @@ namespace KeyVaultCa.Core
                     try
                     {
                         // disable the temp cert for self signing operation
-                        _logger.LogInformation("Disable the temporary certificate for self signing operation.");
-                        var attr = new CertificateAttributes()
-                        {
-                            Enabled = false
-                        };
-                        await _keyVaultClient.UpdateCertificateAsync(caTempCertIdentifier, null, attr);
+                        _logger.LogDebug("Disable the temporary certificate for self signing operation.");
+
+                        Response<KeyVaultCertificateWithPolicy> certificateResponse = _keyVaultClient.GetCertificate(caTempCertIdentifier);
+                        KeyVaultCertificateWithPolicy certificate = certificateResponse.Value;
+                        CertificateProperties certificateProperties = certificate.Properties;
+                        certificateProperties.Enabled = false;
+                        await _keyVaultClient.UpdateCertificatePropertiesAsync(certificateProperties);
                     }
                     catch
                     {
@@ -177,68 +149,14 @@ namespace KeyVaultCa.Core
             }
         }
 
-        /// <summary>
-        /// Sign a digest with the signing key.
-        /// </summary>
-        public async Task<byte[]> SignDigestAsync(
-            string signingKey,
-            byte[] digest,
-            HashAlgorithmName hashAlgorithm,
-            RSASignaturePadding padding,
-            CancellationToken ct = default)
-        {
-            string algorithm;
-
-            if (padding == RSASignaturePadding.Pkcs1)
-            {
-                if (hashAlgorithm == HashAlgorithmName.SHA256)
-                {
-                    algorithm = JsonWebKeySignatureAlgorithm.RS256;
-                }
-                else if (hashAlgorithm == HashAlgorithmName.SHA384)
-                {
-                    algorithm = JsonWebKeySignatureAlgorithm.RS384;
-                }
-                else if (hashAlgorithm == HashAlgorithmName.SHA512)
-                {
-                    algorithm = JsonWebKeySignatureAlgorithm.RS512;
-                }
-                else
-                {
-                    _logger.LogError("Error in SignDigestAsync {signingKey}. Unsupported hash algorithm used.", signingKey);
-                    throw new ArgumentOutOfRangeException(nameof(hashAlgorithm));
-                }
-            }
-            else
-            {
-                _logger.LogError("Error in SignDigestAsync {padding}. Unsupported padding algorithm used.", padding);
-                throw new ArgumentOutOfRangeException(nameof(padding));
-            }
-
-            KeyOperationResult result = null;
-
-            Random jitterer = new Random();
-
-            var retryPolicy = await Policy
-              .Handle<Exception>() // etc
-              .WaitAndRetryAsync(6, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))  // exponential back-off: 2, 4, 8 etc
-                               + TimeSpan.FromMilliseconds(jitterer.Next(0, 1000))) // plus some jitter: up to 1 second                                                                                                  
-              .ExecuteAndCaptureAsync(async () =>
-              {
-                  result = await _keyVaultClient.SignAsync(signingKey, algorithm, digest, ct).ConfigureAwait(false);
-              });
-
-            return result.Result;
-        }
-
         private Dictionary<string, string> CreateCertificateTags(string id, bool trusted)
         {
-            Dictionary<string, string> tags = new Dictionary<string, string>
+            var tags = new Dictionary<string, string>
             {
                 [id] = trusted ? "Trusted" : "Issuer"
             };
 
-            _logger.LogInformation("Created certificate tags for certificate with id {id}", id);
+            _logger.LogDebug("Created certificate tags for certificate with id {id} and trusted {trusted}.", id, trusted);
             return tags;
         }
 
@@ -249,94 +167,40 @@ namespace KeyVaultCa.Core
             bool reuseKey = false,
             bool exportable = false)
         {
-
-            var policy = new CertificatePolicy
+            var issuerName = selfSigned ? "Self" : "Unknown";
+            var policy = new CertificatePolicy(issuerName, subject)
             {
-                IssuerParameters = new IssuerParameters
-                {
-                    Name = selfSigned ? "Self" : "Unknown"
-                },
-                KeyProperties = new KeyProperties
-                {
-                    Exportable = exportable,
-                    KeySize = keySize,
-                    KeyType = "RSA",
-                    ReuseKey = reuseKey
-                },
-                SecretProperties = new SecretProperties
-                {
-                    ContentType = CertificateContentType.Pfx
-                },
-                X509CertificateProperties = new X509CertificateProperties
-                {
-                    Subject = subject
-                },
+                Exportable = exportable,
+                KeySize = keySize,
+                KeyType = "RSA",
+                ReuseKey = reuseKey,
+                ContentType = CertificateContentType.Pkcs12
             };
 
-            _logger.LogInformation("Created certificate policy for certificate with subject {subject}", subject);
+            _logger.LogDebug("Created certificate policy for certificate with issuer name {issuerName}, self signed {selfSigned} and reused key {reuseKey}.", issuerName, selfSigned, reuseKey);
             return policy;
         }
 
-        private CertificateAttributes CreateCertificateAttributes(DateTime notBefore, DateTime notAfter)
-        {
-            var attributes = new CertificateAttributes
-            {
-                Enabled = true,
-                NotBefore = notBefore,
-                Expires = notAfter
-            };
-
-            _logger.LogInformation("Created certificate attributes with validity not before {nbf} and not after {exp} and enabled true.", notBefore, notAfter);
-            return attributes;
-        }
-
-        //cache the token and ask for a new one only if expired
-        private AuthenticationResult authenticationResult = null;
-
         /// <summary>
-        /// Private callback for keyvault authentication.
-        /// </summary>
-        private async Task<string> GetAccessTokenAsync(string authority, string resource, string scope)
-        {
-            bool needRequestToken = false;
-
-            if (authenticationResult == null)
-            {
-                needRequestToken = true;
-            }
-            else
-            {
-                TimeSpan timeToExpire = authenticationResult.ExpiresOn - DateTime.UtcNow;
-
-                if (timeToExpire < TimeSpan.FromMinutes(5))
-                {
-                    needRequestToken = true;
-                }
-            }
-
-            if (needRequestToken)
-            {
-                var context = new AuthenticationContext(authority, TokenCache.DefaultShared);
-                authenticationResult = await context.AcquireTokenAsync(resource, _clientCredential);
-            }
-
-            return authenticationResult.AccessToken;
-        }
-
-        /// <summary>
-        /// Get Certificate bundle from key Vault.
+        /// Get Certificate with Policy from Key Vault.
         /// </summary>
         /// <param name="name">Key Vault name</param>
         /// <param name="ct">CancellationToken</param>
         /// <returns></returns>
-        internal async Task<CertificateBundle> GetCertificateAsync(string name, CancellationToken ct = default)
+
+        internal async Task<Response<KeyVaultCertificateWithPolicy>> GetCertificateAsync(string name, CancellationToken ct = default)
         {
-            return await _keyVaultClient.GetCertificateAsync(_vaultBaseUrl, name, ct).ConfigureAwait(false);
+            return await _keyVaultClient.GetCertificateAsync(name, ct).ConfigureAwait(false);
         }
 
-        internal async Task<IPage<CertificateItem>> GetCertificateVersionsAsync(string name)
+        internal async Task<int> GetCertificateVersionsAsync(string name)
         {
-            return await _keyVaultClient.GetCertificateVersionsAsync(_vaultBaseUrl, name).ConfigureAwait(false);
+            var versions = 0;
+            await foreach (CertificateProperties cert in _keyVaultClient.GetPropertiesOfCertificateVersionsAsync(name))
+            {
+                versions++;
+            }
+            return versions;
         }
     }
 }
