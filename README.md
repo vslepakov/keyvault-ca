@@ -36,7 +36,9 @@ The following common block must be filled in, for all usages of the projects.
 ```
 "KeyVault": {
     "KeyVaultUrl": "<Key Vault URL>",
-    "IssuingCA": "<Name of the issuing certificate in KeyVault.>"
+    "IssuingCA": "<Name of the issuing certificate in KeyVault.>",
+    "CertValidityInDays": "<Validity period for issued certificates (maximum is 365 days)>",
+    "CertPathLength": "<Path length of the certificate chain which gives the maximum number of non-self-issued intermediate certificates that may follow this certificate in a valid certification path. For the Root CA certificate stored in KV, the value should be at least 1, for the others, obtained through the EST server, is sufficient to have 0.>"
   }
 ```
 For overriding settings from command line arguments on Linux, use a syntax similar to `KeyVault__KeyVaultUrl` and for Windows, `KeyVault:KeyVaultUrl`.
