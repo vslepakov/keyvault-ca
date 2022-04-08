@@ -1,5 +1,3 @@
-#cloud-config
-
 apt:
   preserve_sources_list: true
   sources:
@@ -25,10 +23,12 @@ apt:
         NdCFTW7wY0Fb1fWJ+/KTsC4=
         =J6gs
         -----END PGP PUBLIC KEY BLOCK----- 
+
 packages:
   - moby-cli
   - libiothsm-std
   - moby-engine
+
 write_files:
   - path: /etc/aziot/config.toml
     permissions: '0444'
@@ -97,6 +97,7 @@ write_files:
 
       #username = "${EST_USERNAME}"
       #password = "${EST_PASSWORD}"
+
 runcmd:
   - |
       set -x
@@ -120,5 +121,4 @@ runcmd:
         echo applying configuration to iot edge...
         
         sudo iotedge config apply
-
       ) &

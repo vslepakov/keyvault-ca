@@ -34,7 +34,7 @@ variable "issuing_ca" {
 }
 
 variable "cert_validity_in_days" {
-  type = string
+  type    = string
   default = "365"
 }
 
@@ -51,7 +51,7 @@ variable "acr_admin_username" {
 }
 
 variable "acr_admin_password" {
-  type = string
+  type      = string
   sensitive = true
 }
 

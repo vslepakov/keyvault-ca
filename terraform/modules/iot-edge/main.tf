@@ -41,7 +41,6 @@ resource "azurerm_virtual_network" "iot_edge" {
     address_prefix = "10.0.1.0/24"
     security_group = azurerm_network_security_group.iot_edge.id
   }
-
 }
 
 resource "azurerm_network_interface" "iot_edge" {
@@ -73,14 +72,14 @@ resource "azurerm_linux_virtual_machine" "iot_edge" {
   ]
 
   custom_data = base64encode(templatefile("modules/iot-edge/cloud-init.yaml", {
-    "SCOPE_ID"                 = var.dps_scope_id
-    "DEVICE_ID"                = var.edge_vm_name
-    "HOSTNAME"                 = var.edge_vm_name
-    "EST_HOSTNAME"             = var.app_hostname
-    "EST_USERNAME"             = var.est_user
-    "EST_PASSWORD"             = var.est_password
-    "VM_USER_NAME"             = var.vm_user_name
-    "RESOURCE_PREFIX"          = var.resource_prefix
+    "SCOPE_ID"        = var.dps_scope_id
+    "DEVICE_ID"       = var.edge_vm_name
+    "HOSTNAME"        = var.edge_vm_name
+    "EST_HOSTNAME"    = var.app_hostname
+    "EST_USERNAME"    = var.est_user
+    "EST_PASSWORD"    = var.est_password
+    "VM_USER_NAME"    = var.vm_user_name
+    "RESOURCE_PREFIX" = var.resource_prefix
   }))
 
   source_image_reference {
