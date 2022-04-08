@@ -20,7 +20,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Folder Include="TrustedCAs\" />
+		<None Update="TrustedCAs\f47943d79-ca.cer">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
 	</ItemGroup>
 
 	<ItemGroup>
