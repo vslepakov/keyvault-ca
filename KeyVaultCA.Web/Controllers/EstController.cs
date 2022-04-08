@@ -58,7 +58,7 @@ namespace KeyVaultCA.Web.Controllers
 
             _logger.LogInformation("Is a CA certificate: {flag}.", caCert);
 
-            var cert = await _keyVaultCertProvider.SigningRequestAsync(
+            var cert = await _keyVaultCertProvider.SignRequestAsync(
                 Convert.FromBase64String(cleanedUpBody), _configuration.IssuingCA, _configuration.CertValidityInDays, caCert);
 
             var pkcs7 = EncodeCertificatesAsPkcs7(new[] { cert });
