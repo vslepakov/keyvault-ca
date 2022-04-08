@@ -1,0 +1,1 @@
+This folder is used for storing certificates locally and injecting them into DPS and the edge device
