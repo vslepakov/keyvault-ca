@@ -148,11 +148,12 @@ namespace KeyVaultCa.Core
                 throw new ArgumentOutOfRangeException(nameof(padding));
             }
 
-            var cryptoClient = new CryptographyClient(signingKey, _credential); //???
+            // create a client for performing cryptographic operations on Key Vault
+            var cryptoClient = new CryptographyClient(signingKey, _credential);
 
             SignResult result = null;
 
-            Random jitterer = new Random();
+            Random jitterer = new();
 
             var retryPolicy = await Policy
               .Handle<Exception>() // etc

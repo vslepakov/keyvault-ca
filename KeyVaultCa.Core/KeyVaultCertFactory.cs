@@ -30,7 +30,8 @@ namespace KeyVaultCa.Core
             X509Certificate2 issuerCAKeyCert,
             RSA publicKey,
             X509SignatureGenerator generator,
-            bool caCert = false)
+            bool caCert = false,
+            int certPathLength = 0)
         {
             if (publicKey == null)
             {
@@ -50,12 +51,7 @@ namespace KeyVaultCa.Core
             var subjectDN = new X500DistinguishedName(subjectName);
             var request = new CertificateRequest(subjectDN, publicKey, GetRSAHashAlgorithmName(hashSizeInBits), RSASignaturePadding.Pkcs1);
 
-            var pathLengthConstraint = 0;
-            if (caCert)
-            {
-                pathLengthConstraint = 1;
-            }
-            request.CertificateExtensions.Add(new X509BasicConstraintsExtension(caCert, caCert, pathLengthConstraint, true));
+            request.CertificateExtensions.Add(new X509BasicConstraintsExtension(caCert, caCert, certPathLength, true));
 
             // Subject Key Identifier
             var ski = new X509SubjectKeyIdentifierExtension(
@@ -163,7 +159,7 @@ namespace KeyVaultCa.Core
         /// Convert a hex string to a byte array.
         /// </summary>
         /// <param name="hexString">The hex string</param>
-        internal static byte[] HexToByteArray(string hexString)
+        private static byte[] HexToByteArray(string hexString)
         {
             byte[] bytes = new byte[hexString.Length / 2];
 
