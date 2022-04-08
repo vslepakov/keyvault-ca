@@ -1,13 +1,3 @@
-
-terraform {
-  required_providers {
-    shell = {
-      source  = "scottwinkler/shell"
-      version = "1.7.7"
-    }
-  }
-}
-
 data "azurerm_subscription" "current" {
 }
 
@@ -15,7 +5,7 @@ resource "azurerm_iothub" "iothub" {
   name                          = "${var.resource_prefix}-iot-hub"
   resource_group_name           = var.resource_group_name
   location                      = var.location
-  #public_network_access_enabled = false
+  public_network_access_enabled = true
 
   sku {
     name     = "S1"
@@ -62,7 +52,7 @@ resource "azurerm_iothub_dps" "iot_dps" {
   name                          = "${var.resource_prefix}-iotdps"
   resource_group_name           = var.resource_group_name
   location                      = var.location
-  #public_network_access_enabled = false
+  public_network_access_enabled = true
 
   sku {
     name     = "S1"

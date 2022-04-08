@@ -1,22 +1,5 @@
-terraform {
-  required_providers {
-    shell = {
-      source  = "scottwinkler/shell"
-      version = "1.7.7"
-    }
-  }
-}
-
-# provider "shell" {}
-
-resource "random_string" "vm_user_name" {
-  length  = 10
-  special = false
-}
-
 locals {
   dns_label_prefix = "${var.resource_prefix}-iot-edge"
-  vm_user_name     = var.vm_user_name != "" ? var.vm_user_name : random_string.vm_user_name.result
 }
 
 ### Create Virtual IoT Edge Device ###
@@ -74,27 +57,13 @@ resource "azurerm_network_interface" "iot_edge" {
   }
 }
 
-resource "tls_private_key" "vm_ssh" {
-  algorithm = "RSA"
-  rsa_bits  = 4096
-}
-
-resource "local_file" "ssh" {
-  content = tls_private_key.vm_ssh.private_key_pem
-  filename          = "../.ssh/id_rsa"
-  file_permission   = "600"
-}
-
 resource "azurerm_linux_virtual_machine" "iot_edge" {
   name                            = var.edge_vm_name
   location                        = var.location
   resource_group_name             = var.resource_group_name
-  admin_username                  = local.vm_user_name
-  disable_password_authentication = true
-  admin_ssh_key {
-    username   = local.vm_user_name
-    public_key = tls_private_key.vm_ssh.public_key_openssh
-  }
+  admin_username                  = var.vm_user_name
+  disable_password_authentication = false
+  admin_password                  = var.vm_password
 
   provision_vm_agent         = false
   allow_extension_operations = false
@@ -103,13 +72,15 @@ resource "azurerm_linux_virtual_machine" "iot_edge" {
     azurerm_network_interface.iot_edge.id
   ]
 
-  custom_data = base64encode(templatefile("modules/iot-edge/cloud-init.template.yaml", {
+  custom_data = base64encode(templatefile("modules/iot-edge/cloud-init.yaml", {
     "SCOPE_ID"                 = var.dps_scope_id
     "DEVICE_ID"                = var.edge_vm_name
     "HOSTNAME"                 = var.edge_vm_name
     "EST_HOSTNAME"             = var.app_hostname
     "EST_USERNAME"             = var.est_user
     "EST_PASSWORD"             = var.est_password
+    "VM_USER_NAME"             = var.vm_user_name
+    "RESOURCE_PREFIX"          = var.resource_prefix
   }))
 
   source_image_reference {

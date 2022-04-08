@@ -385,8 +385,4 @@ override.tf.json
 .ssh/id_rsa
 
 # certs
-*.csr
-*.key
-*.cer
-*.csr.der
-Certs/*-cert
+Certs/*

@@ -14,9 +14,12 @@ variable "vm_user_name" {
   type = string
 }
 
+variable "vm_password" {
+  type = string
+}
+
 variable "vm_sku" {
-  type    = string
-  default = "Standard_DS2_v2"
+  type = string
 }
 
 variable "dps_scope_id" {
@@ -32,9 +35,9 @@ variable "app_hostname" {
 }
 
 variable "est_user" {
-  type    = string
+  type = string
 }
 
 variable "est_password" {
-  type    = string
+  type = string
 }

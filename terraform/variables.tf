@@ -8,9 +8,14 @@ variable "resource_prefix" {
   default = ""
 }
 
-variable "edge_vm_user_name" {
+variable "vm_user_name" {
   type    = string
-  default = "" # The default value is empty, but in the usages of this variable it will be overridden by a generated value if left empty.
+  default = "foo"
+}
+
+variable "vm_password" {
+  type    = string
+  default = ""
 }
 
 variable "edge_vm_sku" {

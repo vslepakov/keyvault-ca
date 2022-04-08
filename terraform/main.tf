@@ -30,11 +30,24 @@ resource "random_id" "prefix" {
   prefix      = "f"
 }
 
+resource "random_string" "vm_user_name" {
+  length  = 10
+  special = false
+}
+
+resource "random_string" "vm_password" {
+  length  = 10
+  number = true
+  special = true
+}
+
 locals {
   resource_prefix          = var.resource_prefix == "" ? lower(random_id.prefix.hex) : var.resource_prefix
   issuing_ca               = "${local.resource_prefix}-ca"
   edge_device_name         = "${local.resource_prefix}-edge-device"
   certs_path               = "../Certs/${local.resource_prefix}"
+  vm_user_name             = var.vm_user_name != "" ? var.vm_user_name : random_string.vm_user_name.result
+  vm_password              = var.vm_password != "" ? var.vm_password : random_string.vm_password.result
 }
 
 resource "azurerm_resource_group" "rg" {
@@ -86,7 +99,8 @@ module "iot_edge" {
   resource_prefix          = local.resource_prefix
   resource_group_name      = azurerm_resource_group.rg.name
   location                 = var.location
-  vm_user_name             = var.edge_vm_user_name
+  vm_user_name             = local.vm_user_name
+  vm_password              = local.vm_password
   vm_sku                   = var.edge_vm_sku
   dps_scope_id             = module.iot_hub.iot_dps_scope_id
   edge_vm_name             = local.edge_device_name
@@ -118,6 +132,6 @@ resource "null_resource" "run-api-facade" {
 
   provisioner "local-exec" {
           working_dir = "../KeyVaultCA"
-          command = "dotnet run --Csr:IsRootCA false --Keyvault:IssuingCA ${local.resource_prefix}-ca --Csr:PathToCsr ${local.certs_path}.csr.der --Csr:OutputFileName ${local.certs_path}-cert --Keyvault:IssuingCA ${local.issuing_ca} --Keyvault:KeyVaultUrl ${module.keyvault.keyvault_url}"
+          command = "dotnet run --Csr:IsRootCA false --Csr:PathToCsr ${local.certs_path}.csr.der --Csr:OutputFileName ${local.certs_path}-cert --Keyvault:IssuingCA ${local.issuing_ca} --Keyvault:KeyVaultUrl ${module.keyvault.keyvault_url}"
   }
 }
