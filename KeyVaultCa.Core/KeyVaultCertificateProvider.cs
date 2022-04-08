@@ -1,3 +1,8 @@
+// ------------------------------------------------------------
+//  Copyright (c) Microsoft Corporation.  All rights reserved.
+//  Licensed under the MIT License (MIT). See License.txt in the repo root for license information.
+// ------------------------------------------------------------
+
 using Microsoft.Extensions.Logging;
 using Org.BouncyCastle.Pkcs;
 using System;
@@ -18,7 +23,7 @@ namespace KeyVaultCa.Core
             _logger = logger;
         }
 
-        public async Task CreateCACertificateAsync(string issuerCertificateName, string subject)
+        public async Task CreateCACertificateAsync(string issuerCertificateName, string subject, int certPathLength)
         {
             var certVersions = await _keyVaultServiceClient.GetCertificateVersionsAsync(issuerCertificateName).ConfigureAwait(false);
 
@@ -37,8 +42,9 @@ namespace KeyVaultCa.Core
                         notBefore,
                         notBefore.AddMonths(48),
                         4096,
-                        256);
-                _logger.LogInformation("A new certificate with issuer name {name} was created succsessfully.", issuerCertificateName);
+                        256,
+                        certPathLength);
+                _logger.LogInformation("A new certificate with issuer name {name} and path length {path} was created succsessfully.", issuerCertificateName, certPathLength);
             }
         }
 
@@ -69,7 +75,7 @@ namespace KeyVaultCa.Core
         /// <summary>
         /// Creates a KeyVault signed certficate from signing request.
         /// </summary>
-        public async Task<X509Certificate2> SigningRequestAsync(
+        public async Task<X509Certificate2> SignRequestAsync(
             byte[] certificateRequest,
             string issuerCertificateName,
             int validityInDays,

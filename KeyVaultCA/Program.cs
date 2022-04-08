@@ -25,7 +25,7 @@ namespace KeyVaultCA
         private static async Task CreateCertificate(IConfiguration config)
         {
             var estConfig = config.GetSection("KeyVault").Get<EstConfiguration>();
-            var csrConfig = config.GetSection("Csr").Get<CsrConfiguration>();  
+            var csrConfig = config.GetSection("Csr").Get<CsrConfiguration>();
 
             using var loggerFactory = LoggerFactory.Create(builder =>
             {
@@ -40,7 +40,7 @@ namespace KeyVaultCA
             ILogger logger = loggerFactory.CreateLogger<Program>();
             logger.LogInformation("KeyVaultCA app started.");
 
-            var keyVaultServiceClient = new KeyVaultServiceClient(estConfig, new DefaultAzureCredential(),loggerFactory.CreateLogger<KeyVaultServiceClient>());
+            var keyVaultServiceClient = new KeyVaultServiceClient(estConfig, new DefaultAzureCredential(), loggerFactory.CreateLogger<KeyVaultServiceClient>());
             var kvCertProvider = new KeyVaultCertificateProvider(keyVaultServiceClient, loggerFactory.CreateLogger<KeyVaultCertificateProvider>());
 
             if (csrConfig.IsRootCA)
@@ -52,8 +52,8 @@ namespace KeyVaultCA
                 }
 
                 // Generate issuing certificate in KeyVault
-                await kvCertProvider.CreateCACertificateAsync(estConfig.IssuingCA, csrConfig.Subject);
-                logger.LogInformation("CA certificate was created successfully and can be found in the Key Vault {kvUrl}.", estConfig.KeyVaultUrl);
+                await kvCertProvider.CreateCACertificateAsync(estConfig.IssuingCA, csrConfig.Subject, estConfig.CertPathLength);
+                logger.LogInformation("CA certificate was either created successfully or it already existed in the Key Vault {kvUrl}.", estConfig.KeyVaultUrl);
             }
             else
             {
@@ -63,9 +63,15 @@ namespace KeyVaultCA
                     Environment.Exit(1);
                 }
 
+                if (estConfig.CertValidityInDays <= 0 || estConfig.CertValidityInDays > 365)
+                {
+                    logger.LogError("Number of days specified as the certificate validity period should be between 1 and 365.");
+                    Environment.Exit(1);
+                }
+
                 // Issue device certificate
                 var csr = File.ReadAllBytes(csrConfig.PathToCsr);
-                var cert = await kvCertProvider.SigningRequestAsync(csr, estConfig.IssuingCA, 365);
+                var cert = await kvCertProvider.SignRequestAsync(csr, estConfig.IssuingCA, estConfig.CertValidityInDays);
 
                 File.WriteAllBytes(csrConfig.OutputFileName, cert.Export(System.Security.Cryptography.X509Certificates.X509ContentType.Cert));
                 logger.LogInformation("Device certificate was created successfully.");
