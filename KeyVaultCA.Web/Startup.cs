@@ -58,7 +58,7 @@ namespace KeyVaultCA.Web
                    .AddCertificate(options =>
                    {
                        var trustedCAs = new List<X509Certificate2>();
-                       var trustedCADir = Path.Combine(Directory.GetCurrentDirectory(), @"TrustedCAs");
+                       var trustedCADir = Path.Combine(Assembly.GetEntryAssembly().Location, @"TrustedCAs");
                        foreach (var file in Directory.EnumerateFiles(trustedCADir, "*.cer"))
                        {
                            var contents = File.ReadAllText(file);
