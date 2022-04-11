@@ -16,7 +16,7 @@ variable "keyvault_url" {
 
 variable "authmode" {
   type    = string
-  default = "x509"
+  default = "Basic"
 }
 
 variable "est_user" {
