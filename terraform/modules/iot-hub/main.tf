@@ -71,12 +71,7 @@ resource "azurerm_iothub_dps" "iot_dps" {
 # Currently using local exec instead of azurerm_iothub_dps_certificate due to missing option to verify CA during upload in Terraform, missing ability to create enrollment groups and to retrieve cert from Key Vault instead of manual download
 resource "null_resource" "dps_rootca_enroll" {
   provisioner "local-exec" {
-          working_dir = "../Certs"  
-          command = "az keyvault certificate download --file ${var.issuing_ca}.cer --encoding DER --name ${var.issuing_ca} --vault-name ${var.keyvault_name}"
-    }
-
-  provisioner "local-exec" {
-          working_dir = "../Certs" 
+          working_dir = "../KeyVaultCA.Web/TrustedCAs" 
           command = "az iot dps certificate create --certificate-name ${var.issuing_ca} --dps-name ${azurerm_iothub_dps.iot_dps.name} --path ${var.issuing_ca}.cer --resource-group ${var.resource_group_name} --verified true"
     }
 

@@ -26,6 +26,8 @@ resource "azurerm_app_service" "appservice" {
   location            = var.location
   resource_group_name = var.resource_group_name
   app_service_plan_id = azurerm_app_service_plan.appserviceplan.id
+  client_cert_enabled = var.authmode== "Basic" ? false : true
+  client_cert_mode    = var.authmode== "Basic" ? "Optional" : "Required"
 
   site_config {
     dotnet_framework_version = "v6.0"
@@ -79,4 +81,11 @@ resource "azurerm_key_vault_access_policy" "user_accesspolicy" {
   certificate_permissions = [
     "Get", "List", "Update", "Create", "Import", "Delete", "Recover", "Backup", "Restore", "ManageIssuers", "GetIssuers", "ListIssuers", "SetIssuers", "DeleteIssuers"
   ]
+}
+
+resource "null_resource" "add_rootca_app" {
+  provisioner "local-exec" {
+          working_dir = "../KeyVaultCA.Web/TrustedCAs"  
+          command = "az keyvault certificate download --file ${var.issuing_ca}.cer --encoding PEM --name ${var.issuing_ca} --vault-name ${var.keyvault_name}"
+    }
 }

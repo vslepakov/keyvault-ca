@@ -16,7 +16,7 @@ variable "keyvault_url" {
 
 variable "authmode" {
   type    = string
-  default = "Basic"
+  default = "x509"
 }
 
 variable "est_user" {
@@ -53,6 +53,10 @@ variable "acr_admin_username" {
 variable "acr_admin_password" {
   type = string
   sensitive = true
+}
+
+variable "keyvault_name" {
+  type = string
 }
 
 variable "keyvault_id" {
