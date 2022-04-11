@@ -4,6 +4,7 @@ using KeyVaultCA.Web.Auth;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Certificate;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -98,6 +99,12 @@ namespace KeyVaultCA.Web
                    })
                    .AddCertificateCache();
 
+                services.Configure<ForwardedHeadersOptions>(options =>
+                {
+                    options.ForwardedHeaders = ForwardedHeaders.XForwardedProto;
+                    options.ForwardedProtoHeaderName = "X-Forwarded-Proto";
+                });
+
                 services.AddCertificateForwarding(options =>
                 {
                     options.CertificateHeader = "X-SSL-CERT";
@@ -135,6 +142,7 @@ namespace KeyVaultCA.Web
             }
 
             app.UseRouting();
+            app.UseForwardedHeaders();
             app.UseCertificateForwarding();
             app.UseAuthentication();
             app.UseAuthorization();
