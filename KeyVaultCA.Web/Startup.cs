@@ -12,7 +12,6 @@ using Microsoft.OpenApi.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
@@ -59,7 +58,7 @@ namespace KeyVaultCA.Web
                    .AddCertificate(options =>
                    {
                        var trustedCAs = new List<X509Certificate2>();
-                       var trustedCADir = Path.Combine(Assembly.GetEntryAssembly().Location, @"TrustedCAs");
+                       var trustedCADir = Path.Combine(AppContext.BaseDirectory, @"TrustedCAs");
                        foreach (var file in Directory.EnumerateFiles(trustedCADir, "*.cer"))
                        {
                            var contents = File.ReadAllText(file);
