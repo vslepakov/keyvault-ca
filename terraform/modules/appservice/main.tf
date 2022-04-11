@@ -82,10 +82,3 @@ resource "azurerm_key_vault_access_policy" "user_accesspolicy" {
     "Get", "List", "Update", "Create", "Import", "Delete", "Recover", "Backup", "Restore", "ManageIssuers", "GetIssuers", "ListIssuers", "SetIssuers", "DeleteIssuers"
   ]
 }
-
-resource "null_resource" "add_rootca_app" {
-  provisioner "local-exec" {
-          working_dir = "../KeyVaultCA.Web/TrustedCAs"  
-          command = "az keyvault certificate download --file ${var.issuing_ca}.cer --encoding PEM --name ${var.issuing_ca} --vault-name ${var.keyvault_name}"
-    }
-}
