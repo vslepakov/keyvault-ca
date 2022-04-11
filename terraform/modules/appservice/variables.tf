@@ -55,10 +55,6 @@ variable "acr_admin_password" {
   sensitive = true
 }
 
-variable "keyvault_name" {
-  type = string
-}
-
 variable "keyvault_id" {
   type = string
 }

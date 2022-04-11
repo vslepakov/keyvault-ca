@@ -113,9 +113,7 @@ namespace KeyVaultCA.Web
 
                         return clientCertificate;
                     };
-                });
-
-                
+                });    
             }
 
             services.AddSwaggerGen(c =>

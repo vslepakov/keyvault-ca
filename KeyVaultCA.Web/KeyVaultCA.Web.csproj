@@ -20,12 +20,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Update="TrustedCAs\f47943d79-ca.cer">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-	</ItemGroup>
-
-	<ItemGroup>
 		<Content Update="appsettings.json">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
