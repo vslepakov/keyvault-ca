@@ -51,7 +51,6 @@ write_files:
       [provisioning.attestation.identity_cert]
       method = "est"
       common_name = "${DEVICE_ID}"
-      url = "https://${EST_HOSTNAME}/.well-known/est"
 
       # ==============================================================================
       # Cert issuance via EST
@@ -89,13 +88,9 @@ write_files:
       [edge_ca]
       method = "est"
 
-      common_name = "${DEVICE_ID}"
-
       # Optional EST configuration for issuing the Edge CA certificate below.
       # If not set, the defaults in [cert_issuance.est] will be used.
-
-      username = "${EST_USERNAME}"
-      password = "${EST_PASSWORD}"
+      url = "https://${EST_HOSTNAME}/ca/.well-known/est"
 runcmd:
   - |
       set -x
@@ -119,5 +114,4 @@ runcmd:
         echo applying configuration to iot edge...
         
         sudo iotedge config apply
-
       ) &
