@@ -114,6 +114,8 @@ namespace KeyVaultCA.Web
                         return clientCertificate;
                     };
                 });
+
+                
             }
 
             services.AddSwaggerGen(c =>
@@ -133,9 +135,9 @@ namespace KeyVaultCA.Web
             }
 
             app.UseRouting();
+            app.UseCertificateForwarding();
             app.UseAuthentication();
             app.UseAuthorization();
-            app.UseCertificateForwarding();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
