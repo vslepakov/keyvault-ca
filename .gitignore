@@ -387,3 +387,6 @@ override.tf.json
 # certs
 Certs/*
 KeyVaultCA.Web/TrustedCAs/*-ca.cer
+
+# arm templates
+KeyVaultCA.Web/Properties/ServiceDependencies/*/*
