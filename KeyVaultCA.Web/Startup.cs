@@ -62,7 +62,7 @@ namespace KeyVaultCA.Web
                        foreach (var file in Directory.EnumerateFiles(trustedCADir, "*.cer"))
                        {
                            var contents = File.ReadAllText(file);
-                           trustedCAs.Add(new X509Certificate2(Convert.FromBase64String(contents)));
+                           trustedCAs.Add(X509Certificate2.CreateFromPem(contents));
                        }
 
                        options.CustomTrustStore.AddRange(new X509Certificate2Collection(trustedCAs.ToArray()));
