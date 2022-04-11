@@ -26,6 +26,8 @@ resource "azurerm_app_service" "appservice" {
   location            = var.location
   resource_group_name = var.resource_group_name
   app_service_plan_id = azurerm_app_service_plan.appserviceplan.id
+  client_cert_enabled = var.authmode == "Basic" ? false : true
+  client_cert_mode    = var.authmode == "Basic" ? "Optional" : "Required"
 
   site_config {
     dotnet_framework_version = "v6.0"
@@ -37,19 +39,19 @@ resource "azurerm_app_service" "appservice" {
   }
 
   app_settings = {
-    WEBSITES_ENABLE_APP_SERVICE_STORAGE = false
-    "Keyvault__KeyVaultUrl"= var.keyvault_url
-    "EstAuthentication__Auth"=var.authmode
-    "EstAuthentication__EstUsername"=var.est_user
-    "EstAuthentication__EstPassword"=var.est_password
-    "KeyVault__IssuingCA"= var.issuing_ca
-    "KeyVault__CertValidityInDays"= var.cert_validity_in_days
-    "DOCKER_REGISTRY_SERVER_URL"= "https://${var.acr_login_server}"
-    "DOCKER_REGISTRY_SERVER_USERNAME"= var.acr_admin_username
-    "DOCKER_REGISTRY_SERVER_PASSWORD"= var.acr_admin_password
-    "APPINSIGHTS_INSTRUMENTATIONKEY"= azurerm_application_insights.appinsights.instrumentation_key
-    "ApplicationInsights__ConnectionString"= azurerm_application_insights.appinsights.connection_string
-     "ApplicationInsightsAgent_EXTENSION_VERSION" = "~2"
+    WEBSITES_ENABLE_APP_SERVICE_STORAGE          = false
+    "Keyvault__KeyVaultUrl"                      = var.keyvault_url
+    "EstAuthentication__Auth"                    = var.authmode
+    "EstAuthentication__EstUsername"             = var.est_user
+    "EstAuthentication__EstPassword"             = var.est_password
+    "KeyVault__IssuingCA"                        = var.issuing_ca
+    "KeyVault__CertValidityInDays"               = var.cert_validity_in_days
+    "DOCKER_REGISTRY_SERVER_URL"                 = "https://${var.acr_login_server}"
+    "DOCKER_REGISTRY_SERVER_USERNAME"            = var.acr_admin_username
+    "DOCKER_REGISTRY_SERVER_PASSWORD"            = var.acr_admin_password
+    "APPINSIGHTS_INSTRUMENTATIONKEY"             = azurerm_application_insights.appinsights.instrumentation_key
+    "ApplicationInsights__ConnectionString"      = azurerm_application_insights.appinsights.connection_string
+    "ApplicationInsightsAgent_EXTENSION_VERSION" = "~2"
   }
 }
 
