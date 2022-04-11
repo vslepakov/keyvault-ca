@@ -73,7 +73,6 @@ module "appservice" {
   acr_login_server    = module.acr.acr_login_server
   acr_admin_username  = module.acr.acr_admin_username
   acr_admin_password  = module.acr.acr_admin_password
-  keyvault_name       = module.keyvault.keyvault_name
 }
 
 module "iot_hub" {
