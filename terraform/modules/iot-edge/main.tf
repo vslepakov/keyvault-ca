@@ -2,8 +2,6 @@ locals {
   dns_label_prefix = "${var.resource_prefix}-iot-edge"
 }
 
-### Create Virtual IoT Edge Device ###
-
 resource "azurerm_public_ip" "iot_edge" {
   name                = "${local.dns_label_prefix}-ip"
   resource_group_name = var.resource_group_name
@@ -41,7 +39,6 @@ resource "azurerm_virtual_network" "iot_edge" {
     address_prefix = "10.0.1.0/24"
     security_group = azurerm_network_security_group.iot_edge.id
   }
-
 }
 
 resource "azurerm_network_interface" "iot_edge" {

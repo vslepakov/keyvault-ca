@@ -51,8 +51,7 @@ variable "acr_admin_username" {
 }
 
 variable "acr_admin_password" {
-  type      = string
-  sensitive = true
+  type = string
 }
 
 variable "keyvault_id" {

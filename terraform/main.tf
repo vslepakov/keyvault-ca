@@ -15,11 +15,9 @@ provider "azurerm" {
   }
 }
 
-data "azurerm_client_config" "current" {}
-
 resource "random_id" "prefix" {
   byte_length = 4
-  prefix      = "f"
+  prefix      = "v"
 }
 
 resource "random_string" "vm_user_name" {
