@@ -1,6 +1,3 @@
-data "azurerm_subscription" "current" {
-}
-
 resource "azurerm_iothub" "iothub" {
   name                          = "${var.resource_prefix}-iot-hub"
   resource_group_name           = var.resource_group_name

@@ -4,7 +4,7 @@ apt:
   preserve_sources_list: true
   sources:
     msft.list:
-      source: "deb https://packages.microsoft.com/ubuntu/18.04/multiarch/prod bionic main"
+      source: "deb https://packages.microsoft.com/ubuntu/20.04/prod/ focal main"
       key: |
         -----BEGIN PGP PUBLIC KEY BLOCK-----
         Version : GnuPG v1.4.7 (GNU/Linux)
