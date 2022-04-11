@@ -4,10 +4,6 @@ terraform {
       source  = "hashicorp/azurerm"
       version = "=2.98.0"
     }
-    azuread = {
-      source  = "hashicorp/azuread"
-      version = "~> 2.15.0"
-    }
   }
 }
 
@@ -18,8 +14,6 @@ provider "azurerm" {
     }
   }
 }
-
-data "azurerm_client_config" "current" {}
 
 resource "random_id" "prefix" {
   byte_length = 4

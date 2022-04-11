@@ -23,12 +23,10 @@ apt:
         NdCFTW7wY0Fb1fWJ+/KTsC4=
         =J6gs
         -----END PGP PUBLIC KEY BLOCK----- 
-
 packages:
   - moby-cli
   - libiothsm-std
   - moby-engine
-
 write_files:
   - path: /etc/aziot/config.toml
     permissions: '0444'
@@ -95,9 +93,8 @@ write_files:
       # Optional EST configuration for issuing the Edge CA certificate below.
       # If not set, the defaults in [cert_issuance.est] will be used.
 
-      #username = "${EST_USERNAME}"
-      #password = "${EST_PASSWORD}"
-
+      username = "${EST_USERNAME}"
+      password = "${EST_PASSWORD}"
 runcmd:
   - |
       set -x
@@ -120,5 +117,5 @@ runcmd:
         echo
         echo applying configuration to iot edge...
         
-        sudo iotedge config apply
+        sudo iotedge config apply       
       ) &
