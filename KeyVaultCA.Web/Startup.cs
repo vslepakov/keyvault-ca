@@ -58,11 +58,11 @@ namespace KeyVaultCA.Web
                    .AddCertificate(options =>
                    {
                        var trustedCAs = new List<X509Certificate2>();
-                       var trustedCADir = Path.Combine(AppContext.BaseDirectory, @"TrustedCAs");
+                       var trustedCADir = Path.Combine(Directory.GetCurrentDirectory(), @"TrustedCAs");
                        foreach (var file in Directory.EnumerateFiles(trustedCADir, "*.cer"))
                        {
                            var contents = File.ReadAllText(file);
-                           trustedCAs.Add(X509Certificate2.CreateFromPem(contents));
+                           trustedCAs.Add(new X509Certificate2(Convert.FromBase64String(contents)));
                        }
 
                        options.CustomTrustStore.AddRange(new X509Certificate2Collection(trustedCAs.ToArray()));

@@ -61,11 +61,11 @@ write_files:
       trusted_certs = ["file:///etc/aziot/est-ca.pem"]
 
       [cert_issuance.est.auth]
-      #username = "${EST_USERNAME}"
-      #password = "${EST_PASSWORD}"
+      username = "${EST_USERNAME}"
+      password = "${EST_PASSWORD}"
 
-      identity_cert = "file:///home/${VM_USER_NAME}/${RESOURCE_PREFIX}-cert.pem"
-      identity_pk = "file:///home/${VM_USER_NAME}/${RESOURCE_PREFIX}.key.pem"
+      #identity_cert = "file:///home/${VM_USER_NAME}/${RESOURCE_PREFIX}-cert.pem"
+      #identity_pk = "file:///home/${VM_USER_NAME}/${RESOURCE_PREFIX}.key.pem"
 
       [cert_issuance.est.urls]
       default = "https://${EST_HOSTNAME}/.well-known/est"
@@ -94,8 +94,8 @@ write_files:
       # Optional EST configuration for issuing the Edge CA certificate below.
       # If not set, the defaults in [cert_issuance.est] will be used.
 
-      #username = "${EST_USERNAME}"
-      #password = "${EST_PASSWORD}"
+      username = "${EST_USERNAME}"
+      password = "${EST_PASSWORD}"
 runcmd:
   - |
       set -x
