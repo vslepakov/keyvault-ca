@@ -4,6 +4,7 @@ using KeyVaultCA.Web.Auth;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Certificate;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -58,11 +59,11 @@ namespace KeyVaultCA.Web
                    .AddCertificate(options =>
                    {
                        var trustedCAs = new List<X509Certificate2>();
-                       var trustedCADir = Path.Combine(Directory.GetCurrentDirectory(), @"TrustedCAs");
+                       var trustedCADir = Path.Combine(AppContext.BaseDirectory, @"TrustedCAs");
                        foreach (var file in Directory.EnumerateFiles(trustedCADir, "*.cer"))
                        {
                            var contents = File.ReadAllText(file);
-                           trustedCAs.Add(new X509Certificate2(Convert.FromBase64String(contents)));
+                           trustedCAs.Add(X509Certificate2.CreateFromPem(contents));
                        }
 
                        options.CustomTrustStore.AddRange(new X509Certificate2Collection(trustedCAs.ToArray()));
@@ -113,6 +114,12 @@ namespace KeyVaultCA.Web
 
                         return clientCertificate;
                     };
+                });
+
+                services.Configure<ForwardedHeadersOptions>(options =>
+                {
+                    options.ForwardedHeaders = ForwardedHeaders.XForwardedProto;
+                    options.ForwardedProtoHeaderName = "X-Forwarded-Proto";
                 });    
             }
 
@@ -134,6 +141,7 @@ namespace KeyVaultCA.Web
 
             app.UseRouting();
             app.UseCertificateForwarding();
+            app.UseForwardedHeaders();
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseEndpoints(endpoints =>
