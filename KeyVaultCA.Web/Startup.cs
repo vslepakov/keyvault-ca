@@ -144,7 +144,6 @@ namespace KeyVaultCA.Web
             app.UseForwardedHeaders();
             app.UseAuthentication();
             app.UseAuthorization();
-            app.UseCertificateForwarding();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
