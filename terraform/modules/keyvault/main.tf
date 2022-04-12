@@ -7,6 +7,6 @@ resource "azurerm_key_vault" "keyvault-ca" {
   enabled_for_disk_encryption = true
   tenant_id                   = data.azurerm_client_config.current.tenant_id
   purge_protection_enabled    = false
-  soft_delete_retention_days  = 7 
-  sku_name = "standard"
+  soft_delete_retention_days  = 7
+  sku_name                    = "standard"
 }
