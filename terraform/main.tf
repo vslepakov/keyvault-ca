@@ -17,7 +17,7 @@ provider "azurerm" {
 
 resource "random_id" "prefix" {
   byte_length = 4
-  prefix      = "a"
+  prefix      = "f"
 }
 
 resource "random_string" "vm_user_name" {

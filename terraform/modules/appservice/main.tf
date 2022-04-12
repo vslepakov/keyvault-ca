@@ -12,8 +12,8 @@ resource "azurerm_app_service_plan" "appserviceplan" {
   name                = "${var.resource_prefix}-appserviceplan"
   location            = var.location
   resource_group_name = var.resource_group_name
-  kind                = "Linux"
-  reserved            = true
+  kind                = "Windows"
+  reserved            = false
 
   sku {
     tier = "Standard"
@@ -31,7 +31,8 @@ resource "azurerm_app_service" "appservice" {
 
   site_config {
     dotnet_framework_version = "v6.0"
-    linux_fx_version         = "DOCKER|${var.acr_name}.azurecr.io/sample/estserver:v2"
+    #linux_fx_version         = "DOCKER|${var.acr_name}.azurecr.io/sample/estserver:v2"
+    windows_fx_version       = "DOCKER|${var.acr_name}.azurecr.io/sample/estserver:v2"
   }
 
   identity {
