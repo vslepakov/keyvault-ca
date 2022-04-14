@@ -25,15 +25,16 @@ namespace DeviceProvisioningE2ETest
         {
             // Arrange
             var iotHubConnectionString = configuration.GetSection("IotHubConnectionString").Value;
-            var registryManager = RegistryManager.CreateFromConnectionString(iotHubConnectionString);
             var targetDevice = configuration.GetSection("EdgeDeviceName").Value; ;
+
+            var registryManager = RegistryManager.CreateFromConnectionString(iotHubConnectionString);
 
             // Act
             var device = await registryManager.GetDeviceAsync(targetDevice);
-            Assert.IsNotNull(device);
-            var deviceStatus = device.Status;
+            var deviceStatus = device?.Status;
 
             // Assert
+            Assert.IsNotNull(device);
             Assert.AreEqual(deviceStatus, DeviceStatus.Enabled);
         }
     }
