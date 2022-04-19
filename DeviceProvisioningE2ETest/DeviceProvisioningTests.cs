@@ -25,8 +25,7 @@ namespace DeviceProvisioningE2ETest
         {
             // Arrange
             var iotHubConnectionString = configuration.GetSection("IotHubConnectionString").Value;
-            var targetDevice = configuration.GetSection("EdgeDeviceName").Value; ;
-
+            var targetDevice = configuration.GetSection("EdgeDeviceName").Value;
             var registryManager = RegistryManager.CreateFromConnectionString(iotHubConnectionString);
 
             // Act
