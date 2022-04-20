@@ -8,6 +8,6 @@ resource "azurerm_container_registry" "acr" {
 
 resource "null_resource" "push-docker" {
   provisioner "local-exec" {
-    command = "az acr build --image sample/estserver:v2 --registry ${azurerm_container_registry.acr.name} https://github.com/vslepakov/keyvault-ca.git --file ./././KeyVaultCA.Web/Dockerfile"
+    command = "az acr build -r ${azurerm_container_registry.acr.name} --image sample/estserver:v2 https://github.com/vslepakov/keyvault-ca.git -f ./././KeyVaultCA.Web/Dockerfile"
   }
 }

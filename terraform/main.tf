@@ -2,7 +2,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "=2.98.0"
+      version = "=3.2.0"
     }
   }
 }
@@ -67,10 +67,8 @@ module "appservice" {
   issuing_ca          = local.issuing_ca
   keyvault_id         = module.keyvault.keyvault_id
   keyvault_url        = module.keyvault.keyvault_url
-  acr_name            = module.acr.acr_name
+  acr_id              = module.acr.acr_id
   acr_login_server    = module.acr.acr_login_server
-  acr_admin_username  = module.acr.acr_admin_username
-  acr_admin_password  = module.acr.acr_admin_password
 }
 
 module "iot_hub" {
@@ -101,27 +99,16 @@ module "iot_edge" {
 
 resource "null_resource" "run-api-facade" {
   provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
     working_dir = "../KeyvaultCA"
-    command     = "dotnet run --Csr:IsRootCA true --Csr:Subject ${"C=US, ST=WA, L=Redmond, O=Contoso, OU=Contoso HR, CN=Contoso Inc"} --Keyvault:IssuingCA ${local.issuing_ca} --Keyvault:KeyVaultUrl ${module.keyvault.keyvault_url}"
-  }
-  provisioner "local-exec" {
-    working_dir = "../KeyVaultCA"
-    command     = "openssl genrsa -out ${local.certs_path}.key 2048"
-  }
+    command     = <<EOF
+      set -Eeuo pipefail
 
-  provisioner "local-exec" {
-    working_dir = "../KeyVaultCA"
-    command     = "openssl req -new -key ${local.certs_path}.key -subj \"/C=US/ST=WA/L=Redmond/O=Contoso/CN=Contoso Inc\" -out ${local.certs_path}.csr"
-    interpreter = ["PowerShell", "-Command"]
-  }
-
-  provisioner "local-exec" {
-    working_dir = "../KeyVaultCA"
-    command     = "openssl req -in ${local.certs_path}.csr -out ${local.certs_path}.csr.der -outform DER"
-  }
-
-  provisioner "local-exec" {
-    working_dir = "../KeyVaultCA"
-    command     = "dotnet run --Csr:IsRootCA false --Csr:PathToCsr ${local.certs_path}.csr.der --Csr:OutputFileName ${local.certs_path}-cert --Keyvault:IssuingCA ${local.issuing_ca} --Keyvault:KeyVaultUrl ${module.keyvault.keyvault_url}"
+      dotnet run --Csr:IsRootCA true --Csr:Subject "C=US, ST=WA, L=Redmond, O=Contoso, OU=Contoso HR, CN=Contoso Inc" --Keyvault:IssuingCA ${local.issuing_ca} --Keyvault:KeyVaultUrl ${module.keyvault.keyvault_url}
+      openssl genrsa -out ${local.certs_path}.key 2048
+      openssl req -new -key ${local.certs_path}.key -subj "/C=US/ST=WA/L=Redmond/O=Contoso/CN=Contoso Inc" -out ${local.certs_path}.csr
+      openssl req -in ${local.certs_path}.csr -out ${local.certs_path}.csr.der -outform DER
+      dotnet run --Csr:IsRootCA false --Csr:PathToCsr ${local.certs_path}.csr.der --Csr:OutputFileName ${local.certs_path}-cert --Keyvault:IssuingCA ${local.issuing_ca} --Keyvault:KeyVaultUrl ${module.keyvault.keyvault_url}
+    EOF
   }
 }

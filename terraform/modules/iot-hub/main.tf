@@ -68,15 +68,22 @@ resource "azurerm_iothub_dps" "iot_dps" {
 # Currently using local exec instead of azurerm_iothub_dps_certificate due to missing option to verify CA during upload in Terraform, missing ability to create enrollment groups and to retrieve cert from Key Vault instead of manual download
 resource "null_resource" "dps_rootca_enroll" {
   provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
     working_dir = "../KeyVaultCA.Web/TrustedCAs"
-    command     = "az keyvault certificate download --file ${var.issuing_ca}.cer --encoding PEM --name ${var.issuing_ca} --vault-name ${var.keyvault_name}"
-  }
-  provisioner "local-exec" {
-    working_dir = "../KeyVaultCA.Web/TrustedCAs"
-    command     = "az iot dps certificate create --certificate-name ${var.issuing_ca} --dps-name ${azurerm_iothub_dps.iot_dps.name} --path ${var.issuing_ca}.cer --resource-group ${var.resource_group_name} --verified true"
-  }
+    command     = <<EOF
+      set -Eeuo pipefail
 
-  provisioner "local-exec" {
-    command = "az iot dps enrollment-group create -g ${var.resource_group_name} --dps-name ${azurerm_iothub_dps.iot_dps.name}  --enrollment-id ${var.resource_prefix}-enrollmentgroup --edge-enabled true --ca-name ${var.issuing_ca}"
+      CERT_NAME=$(az iot dps certificate list -g ${var.resource_group_name} --dps-name ${azurerm_iothub_dps.iot_dps.name} --query "value[?name=='${var.issuing_ca}'].name" -o tsv)
+
+      if [ -z "$CERT_NAME" ]
+      then
+        rm -f ${var.issuing_ca}.cer && az keyvault certificate download --vault-name ${var.keyvault_name} -n ${var.issuing_ca} -f ${var.issuing_ca}.cer -e PEM
+        az iot dps certificate create -g ${var.resource_group_name} -n ${var.issuing_ca} --dps-name ${azurerm_iothub_dps.iot_dps.name} -p ${var.issuing_ca}.cer -v true
+      else
+        echo "Cert ${var.issuing_ca} already exists."
+      fi
+
+      az iot dps enrollment-group create -g ${var.resource_group_name} --dps-name ${azurerm_iothub_dps.iot_dps.name} --eid ${var.resource_prefix}-enrollmentgroup --ee true --cn ${var.issuing_ca}
+    EOF
   }
 }
