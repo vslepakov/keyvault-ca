@@ -98,7 +98,7 @@ Provide the following variables in the `appsettings.json` of the `KeyVaultCA.Web
     - ```EstUsername``` - username for the EST endpoint
     - ```EstPassword``` - password for the EST endpoint 
 - **x509** - via certificates
-    - put your trusted CA certificates into the ```KeyVaultCA.Web\TrustedCAs``` folder. Make sure to specify CopyToOutput. Note that certificates downloaded from Azure Key Vault are by default encoded as a base64 string.  
+    - put your trusted CA certificates into the ```KeyVaultCA.Web\TrustedCAs``` directory. Make sure to specify CopyToOutput. Note that certificates downloaded from Azure Key Vault are by default encoded as a base64 string.  
    -  if you choose to publish the ```KeyVaultCA.Web``` app to an Azure App Service, make sure to go to **Configuration** -> **General Setttings** -> **Incoming client certificates** -> set **Client certificate mode** to `Require`. 
 
 To ensure that the published Web API can access the Key Vault, go to the App Service that will host the `KeyVaultCA.Web`, click on **Identity** and turn on the `System-Assigned` one. 
@@ -118,6 +118,6 @@ The `KeyVaultCA.Web` writes logs to an Azure Application Insights instance, for 
 
 ## Infrastructure as code
 
-The Terraform scripts listed under the `terraform` folder can be used to deploy the infrastructure required for E2E testing to an Azure environment. This deployment includes an App Service for the EST server to run in using an image pulled from Azure Container Registry, an Azure Key Vault for storing the Root CA and an IoT Hub, Device Provisioning Service and a Linux VM simulating an IoT Edge device. The infrastructure can be deployed by cd'ing into the `terraform` folder and then running `terraform init` followed by `terraform apply`. Terraform will use the logged in Azure user credentials and subsequent subscription to deploy the resources to. 
+The Terraform scripts listed under the `terraform` directory can be used to deploy the infrastructure required for E2E testing to an Azure environment. This deployment includes an App Service for the EST server to run in using an image pulled from Azure Container Registry, an Azure Key Vault for storing the Root CA and an IoT Hub, Device Provisioning Service and a Linux VM simulating an IoT Edge device. The Terraform template uses `dotnet run` to execute the API Facade Console App, hence installing the [.NET Runtime 6](https://dotnet.microsoft.com/en-us/download/dotnet/6.0) is required. The infrastructure can be deployed by cd'ing into the `terraform` directory and then running `terraform init` followed by `terraform apply`. Terraform will use the [logged in Azure user credentials](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/guides/azure_cli) and subsequent subscription to deploy the resources to. 
 
 Currently only the `Basic` option for authenticating to the EST server using username and password is supported in these Terraform scripts.
