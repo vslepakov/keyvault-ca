@@ -1,5 +1,5 @@
 resource "azurerm_iothub" "iothub" {
-  name                          = "${var.resource_prefix}-iot-hub"
+  name                          = "iot-${var.resource_prefix}"
   resource_group_name           = var.resource_group_name
   location                      = var.location
   public_network_access_enabled = true
@@ -46,7 +46,7 @@ resource "azurerm_iothub_shared_access_policy" "iot_hub_dps_shared_access_policy
 }
 
 resource "azurerm_iothub_dps" "iot_dps" {
-  name                          = "${var.resource_prefix}-iotdps"
+  name                          = "provs-${var.resource_prefix}"
   resource_group_name           = var.resource_group_name
   location                      = var.location
   public_network_access_enabled = true
@@ -67,9 +67,14 @@ resource "azurerm_iothub_dps" "iot_dps" {
 
 # Currently using local exec instead of azurerm_iothub_dps_certificate due to missing option to verify CA during upload in Terraform, missing ability to create enrollment groups and to retrieve cert from Key Vault instead of manual download
 resource "null_resource" "dps_rootca_enroll" {
+  triggers = {
+    cer = "${var.issuing_ca}.cer"
+  }
+
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
     working_dir = "../KeyVaultCA.Web/TrustedCAs"
+    when        = create
     command     = <<EOF
       set -Eeuo pipefail
 
@@ -77,13 +82,20 @@ resource "null_resource" "dps_rootca_enroll" {
 
       if [ -z "$CERT_NAME" ]
       then
-        rm -f ${var.issuing_ca}.cer && az keyvault certificate download --vault-name ${var.keyvault_name} -n ${var.issuing_ca} -f ${var.issuing_ca}.cer -e PEM
-        az iot dps certificate create -g ${var.resource_group_name} -n ${var.issuing_ca} --dps-name ${azurerm_iothub_dps.iot_dps.name} -p ${var.issuing_ca}.cer -v true
+        az keyvault certificate download --vault-name ${var.keyvault_name} -n ${var.issuing_ca} -f ${self.triggers.cer} -e PEM
+        az iot dps certificate create -g ${var.resource_group_name} -n ${var.issuing_ca} --dps-name ${azurerm_iothub_dps.iot_dps.name} -p ${self.triggers.cer} -v true
       else
         echo "Cert ${var.issuing_ca} already exists."
       fi
 
       az iot dps enrollment-group create -g ${var.resource_group_name} --dps-name ${azurerm_iothub_dps.iot_dps.name} --eid ${var.resource_prefix}-enrollmentgroup --ee true --cn ${var.issuing_ca}
     EOF
+  }
+
+  provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
+    working_dir = "../KeyVaultCA.Web/TrustedCAs"
+    when        = destroy
+    command     = "rm -f ${self.triggers.cer}"
   }
 }

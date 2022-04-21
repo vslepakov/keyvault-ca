@@ -41,7 +41,7 @@ locals {
 }
 
 resource "azurerm_resource_group" "rg" {
-  name     = "${local.resource_prefix}-keyvault-ca-rg"
+  name     = "rg-${local.resource_prefix}-keyvault-ca"
   location = var.location
 }
 
@@ -91,24 +91,39 @@ module "iot_edge" {
   vm_password         = local.vm_password
   vm_sku              = var.edge_vm_sku
   dps_scope_id        = module.iot_hub.iot_dps_scope_id
-  edge_vm_name        = local.edge_device_name
+  edge_device_name    = local.edge_device_name
   app_hostname        = module.appservice.app_hostname
   est_user            = module.appservice.est_user
   est_password        = module.appservice.est_password
 }
 
 resource "null_resource" "run-api-facade" {
+  triggers = {
+    key     = "${local.certs_path}.key"
+    csr     = "${local.certs_path}.csr"
+    csr_der = "${local.certs_path}.csr.der"
+    cert    = "${local.certs_path}-cert"
+  }
+
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
     working_dir = "../KeyvaultCA"
+    when        = create
     command     = <<EOF
       set -Eeuo pipefail
 
       dotnet run --Csr:IsRootCA true --Csr:Subject "C=US, ST=WA, L=Redmond, O=Contoso, OU=Contoso HR, CN=Contoso Inc" --Keyvault:IssuingCA ${local.issuing_ca} --Keyvault:KeyVaultUrl ${module.keyvault.keyvault_url}
-      openssl genrsa -out ${local.certs_path}.key 2048
-      openssl req -new -key ${local.certs_path}.key -subj "/C=US/ST=WA/L=Redmond/O=Contoso/CN=Contoso Inc" -out ${local.certs_path}.csr
-      openssl req -in ${local.certs_path}.csr -out ${local.certs_path}.csr.der -outform DER
-      dotnet run --Csr:IsRootCA false --Csr:PathToCsr ${local.certs_path}.csr.der --Csr:OutputFileName ${local.certs_path}-cert --Keyvault:IssuingCA ${local.issuing_ca} --Keyvault:KeyVaultUrl ${module.keyvault.keyvault_url}
+      openssl genrsa -out ${self.triggers.key} 2048
+      openssl req -new -key ${self.triggers.key} -subj "/C=US/ST=WA/L=Redmond/O=Contoso/CN=Contoso Inc" -out ${self.triggers.csr}
+      openssl req -in ${self.triggers.csr} -out ${self.triggers.csr_der} -outform DER
+      dotnet run --Csr:IsRootCA false --Csr:PathToCsr ${self.triggers.csr_der} --Csr:OutputFileName ${self.triggers.cert} --Keyvault:IssuingCA ${local.issuing_ca} --Keyvault:KeyVaultUrl ${module.keyvault.keyvault_url}
     EOF
+  }
+
+  provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
+    working_dir = "../KeyvaultCA"
+    when        = destroy
+    command     = "rm -f ${self.triggers.key} ${self.triggers.csr} ${self.triggers.csr_der} ${self.triggers.cert}"
   }
 }

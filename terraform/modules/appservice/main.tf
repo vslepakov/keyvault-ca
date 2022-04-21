@@ -1,14 +1,14 @@
 data "azurerm_client_config" "current" {}
 
 resource "azurerm_application_insights" "appinsights" {
-  name                = "${var.resource_prefix}-appinsights"
+  name                = "appi-${var.resource_prefix}"
   location            = var.location
   resource_group_name = var.resource_group_name
   application_type    = "web"
 }
 
 resource "azurerm_service_plan" "appserviceplan" {
-  name                = "${var.resource_prefix}-appserviceplan"
+  name                = "plan-${var.resource_prefix}"
   location            = var.location
   resource_group_name = var.resource_group_name
   os_type             = "Linux"
@@ -16,7 +16,7 @@ resource "azurerm_service_plan" "appserviceplan" {
 }
 
 resource "azurerm_linux_web_app" "appservice" {
-  name                       = "${var.resource_prefix}-appservice"
+  name                       = "app-${var.resource_prefix}"
   location                   = var.location
   resource_group_name        = var.resource_group_name
   service_plan_id            = azurerm_service_plan.appserviceplan.id

@@ -26,7 +26,7 @@ variable "dps_scope_id" {
   type = string
 }
 
-variable "edge_vm_name" {
+variable "edge_device_name" {
   type = string
 }
 
