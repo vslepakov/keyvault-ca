@@ -111,7 +111,7 @@ namespace KeyVaultCA.Web
                             byte[] bytes = StringToByteArray(headerValue);
                             clientCertificate = new X509Certificate2(bytes);
                         }
-
+                        Console.WriteLine(headerValue);
                         return clientCertificate;
                     };
                 });
