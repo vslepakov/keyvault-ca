@@ -101,7 +101,7 @@ namespace KeyVaultCA.Web
 
                 services.AddCertificateForwarding(options =>
                 {
-                    options.CertificateHeader = "X-SSL-CERT";
+                    options.CertificateHeader = "X-ARR-ClientCert";
                     options.HeaderConverter = (headerValue) =>
                     {
                         X509Certificate2 clientCertificate = null;
