@@ -87,7 +87,7 @@ resource "azurerm_linux_virtual_machine" "iot_edge" {
     "EST_USERNAME"    = var.est_username
     "EST_PASSWORD"    = var.est_password
     "VM_USER_NAME"    = var.vm_username
-    "resource_prefix" = var.resource_prefix
+    "RESOURCE_PREFIX" = var.resource_prefix
   }))
 
   source_image_reference {

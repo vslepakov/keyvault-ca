@@ -20,8 +20,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-       	<Folder Include="TrustedCAs\" />
-    </ItemGroup>
+		<Folder Include="TrustedCAs\" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<Content Update="appsettings.json">
