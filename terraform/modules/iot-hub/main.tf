@@ -73,10 +73,12 @@ resource "null_resource" "dps_rootca_enroll" {
 
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
-    working_dir = "../KeyVaultCA.Web/TrustedCAs"
+    working_dir = "${path.root}/../KeyVaultCA.Web/TrustedCAs"
     when        = create
     command     = <<EOF
       set -Eeuo pipefail
+
+      az config set extension.use_dynamic_install=yes_without_prompt
 
       CERT_NAME=$(az iot dps certificate list -g ${var.resource_group_name} --dps-name ${azurerm_iothub_dps.iot_dps.name} --query "value[?name=='${var.issuing_ca}'].name" -o tsv)
 
@@ -94,7 +96,7 @@ resource "null_resource" "dps_rootca_enroll" {
 
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
-    working_dir = "../KeyVaultCA.Web/TrustedCAs"
+    working_dir = "${path.root}/../KeyVaultCA.Web/TrustedCAs"
     when        = destroy
     command     = "rm -f ${self.triggers.cer}"
   }
