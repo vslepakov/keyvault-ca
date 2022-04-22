@@ -1,5 +1,14 @@
 data "azurerm_client_config" "current" {}
 
+resource "random_string" "est_password" {
+  length  = 10
+  number  = true
+  special = true
+}
+
+locals {
+  est_password = var.est_password == "" ? random_string.est_password.result : var.est_password
+}
 resource "azurerm_application_insights" "appinsights" {
   name                = "${var.resource_prefix}-appinsights"
   location            = var.location
@@ -42,7 +51,7 @@ resource "azurerm_app_service" "appservice" {
     WEBSITES_ENABLE_APP_SERVICE_STORAGE          = false
     "Keyvault__KeyVaultUrl"                      = var.keyvault_url
     "EstAuthentication__Auth"                    = var.authmode
-    "EstAuthentication__EstUsername"             = var.est_user
+    "EstAuthentication__EstUsername"             = var.est_username
     "EstAuthentication__EstPassword"             = var.est_password
     "KeyVault__IssuingCA"                        = var.issuing_ca
     "KeyVault__CertValidityInDays"               = var.cert_validity_in_days

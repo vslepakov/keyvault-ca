@@ -2,6 +2,16 @@ locals {
   dns_label_prefix = "${var.resource_prefix}-iot-edge"
 }
 
+resource "random_string" "vm_password" {
+  length  = 10
+  number  = true
+  special = true
+}
+
+locals {
+  vm_password = var.vm_password == "" ? random_string.vm_password.result : var.vm_password
+}
+
 resource "azurerm_public_ip" "iot_edge" {
   name                = "${local.dns_label_prefix}-ip"
   resource_group_name = var.resource_group_name
@@ -58,9 +68,9 @@ resource "azurerm_linux_virtual_machine" "iot_edge" {
   name                            = var.edge_vm_name
   location                        = var.location
   resource_group_name             = var.resource_group_name
-  admin_username                  = var.vm_user_name
+  admin_username                  = var.vm_username
   disable_password_authentication = false
-  admin_password                  = var.vm_password
+  admin_password                  = local.vm_password
 
   provision_vm_agent         = false
   allow_extension_operations = false
@@ -74,10 +84,10 @@ resource "azurerm_linux_virtual_machine" "iot_edge" {
     "DEVICE_ID"       = var.edge_vm_name
     "HOSTNAME"        = var.edge_vm_name
     "EST_HOSTNAME"    = var.app_hostname
-    "EST_USERNAME"    = var.est_user
+    "EST_USERNAME"    = var.est_username
     "EST_PASSWORD"    = var.est_password
-    "VM_USER_NAME"    = var.vm_user_name
-    "RESOURCE_PREFIX" = var.resource_prefix
+    "VM_USER_NAME"    = var.vm_username
+    "resource_prefix" = var.resource_prefix
   }))
 
   source_image_reference {

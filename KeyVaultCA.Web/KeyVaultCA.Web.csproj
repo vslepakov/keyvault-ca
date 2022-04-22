@@ -20,7 +20,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-        <None Update="TrustedCAs\c298922c0-ca.cer">
+        <None Update="TrustedCAs\ContosoRootCA.cer">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
     </ItemGroup>

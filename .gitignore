@@ -386,4 +386,3 @@ override.tf.json
 
 # certs
 Certs/*
-KeyVaultCA.Web/TrustedCAs/*-ca.cer

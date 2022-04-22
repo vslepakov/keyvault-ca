@@ -120,4 +120,14 @@ The `KeyVaultCA.Web` writes logs to an Azure Application Insights instance, for 
 
 The Terraform scripts listed under the `terraform` folder can be used to deploy the infrastructure required for E2E testing to an Azure environment. This deployment includes an App Service for the EST server to run in using an image pulled from Azure Container Registry, an Azure Key Vault for storing the Root CA and an IoT Hub, Device Provisioning Service and a Linux VM simulating an IoT Edge device. The infrastructure can be deployed by cd'ing into the `terraform` folder and then running `terraform init` followed by `terraform apply`. Terraform will use the logged in Azure user credentials and subsequent subscription to deploy the resources to. 
 
-Currently only the `Basic` option for authenticating to the EST server using username and password is supported in these Terraform scripts.
+The authentication mode is currently set at `Basic`, with default username for both the VM and EST set at `azureuser`, the passwords will be randomly generated and shown as outputs (together with the usernames) for testing purposes. If you would like to change these values you can provide other default values in the `variables.tf` files for both the `iot-edge` and `appservice` module. 
+
+If `x509` is required as authentication mode, then you would need replace the default value of `authmode` within `/terraform/modules/appservice/variables.tf` from "Basic" to "x509" and ensure that the `[cert_issuance.est.auth]` section in `cloud-init.yaml` looks like this:
+```
+      [cert_issuance.est.auth]
+      #username = "${EST_USERNAME}"
+      #password = "${EST_PASSWORD}"
+      
+      identity_cert = "file:///home/${VM_USER_NAME}/${resource_prefix}-cert.pem"
+      identity_pk = "file:///home/${VM_USER_NAME}/${resource_prefix}.key.pem"
+```
