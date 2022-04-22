@@ -10,7 +10,7 @@ variable "resource_prefix" {
 
 variable "vm_user_name" {
   type    = string
-  default = "foo"
+  default = "azureuser"
 }
 
 variable "vm_password" {

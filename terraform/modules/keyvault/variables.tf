@@ -9,3 +9,7 @@ variable "location" {
 variable "resource_prefix" {
   type = string
 }
+
+variable "issuing_ca" {
+  type = string
+}
