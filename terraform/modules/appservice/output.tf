@@ -1,5 +1,5 @@
 output "app_hostname" {
-  value = azurerm_app_service.appservice.default_site_hostname
+  value = azurerm_linux_web_app.appservice.default_hostname
 }
 
 output "est_username" {

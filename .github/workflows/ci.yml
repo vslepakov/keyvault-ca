@@ -9,7 +9,7 @@ on:
 jobs:
 
   build:
-
+    name: 'Build .NET code'
     runs-on: ubuntu-latest
 
     steps:
@@ -22,10 +22,29 @@ jobs:
 
     - name: .NET Restore
       run: dotnet restore
+
     - name: .NET Build
       run: dotnet build --no-restore
+
     - name: .NET Test
       run: dotnet test --no-build --verbosity normal
 
     - name: Docker Build
       run: docker build . -f ./KeyVaultCA.Web/Dockerfile -t keyvault-ca-web:$(date +%s)
+
+  terraform:
+    name: 'Terraform'
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v1
+
+    - name: Terraform Init
+      run: terraform init -input=false
+
+    - name: Terraform Format
+      run: terraform fmt -check -recursive
