@@ -25,7 +25,7 @@ resource "random_id" "prefix" {
 
 locals {
   resource_prefix  = var.resource_prefix == "" ? lower(random_id.prefix.hex) : var.resource_prefix
-  issuing_ca       = "${local.resource_prefix}-ca"
+  issuing_ca       = "ContosoRootCA"
   edge_device_name = "${local.resource_prefix}-edge-device"
 }
 
