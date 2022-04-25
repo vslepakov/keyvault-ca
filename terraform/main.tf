@@ -84,4 +84,5 @@ module "iot_edge" {
   app_hostname        = module.appservice.app_hostname
   est_username        = module.appservice.est_username
   est_password        = module.appservice.est_password
+  auth_mode           = var.auth_mode
 }

@@ -51,7 +51,7 @@ resource "azurerm_linux_web_app" "appservice" {
     "Keyvault__KeyVaultUrl"                      = var.keyvault_url
     "EstAuthentication__Auth"                    = var.auth_mode
     "EstAuthentication__EstUsername"             = var.est_username
-    "EstAuthentication__EstPassword"             = var.est_password
+    "EstAuthentication__EstPassword"             = local.est_password
     "KeyVault__IssuingCA"                        = var.issuing_ca
     "KeyVault__CertValidityInDays"               = var.cert_validity_in_days
     "APPINSIGHTS_INSTRUMENTATIONKEY"             = azurerm_application_insights.appinsights.instrumentation_key

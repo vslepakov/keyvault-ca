@@ -15,5 +15,5 @@ variable "edge_vm_sku" {
 
 variable "auth_mode" {
   type    = string
-  default = "x509"
+  default = "Basic"
 }

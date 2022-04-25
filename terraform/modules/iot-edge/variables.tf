@@ -43,3 +43,7 @@ variable "est_username" {
 variable "est_password" {
   type = string
 }
+
+variable "auth_mode" {
+  type = string
+}
