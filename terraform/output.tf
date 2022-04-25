@@ -7,9 +7,9 @@ output "vm_password" {
 }
 
 output "est_username" {
-  value = module.appservice.est_username
+  value = var.auth_mode == "Basic" ? module.appservice.est_username : "Not set since user selected certificate authentication"
 }
 
 output "est_password" {
-  value = module.appservice.est_password
+  value = var.auth_mode == "Basic" ? module.appservice.est_password: "Not set since user selected certificate authentication"
 }

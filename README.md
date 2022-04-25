@@ -124,7 +124,7 @@ The Terraform scripts listed under the `terraform` directory can be used to depl
 
 The authentication mode is currently set at `Basic`, with default username for both the VM and EST set at `azureuser`, the passwords will be randomly generated and shown as outputs (together with the usernames) for testing purposes. If you would like to change these values you can provide other default values in the `variables.tf` files for both the `iot-edge` and `appservice` module. 
 
-If `x509` is required as authentication mode, then you would need replace the default value of `authmode` within `/terraform/modules/appservice/variables.tf` from "Basic" to "x509" and ensure that the `[cert_issuance.est.auth]` section in `cloud-init.yaml` looks like this:
+If you want to use `x509` certificate-based authentication, then you would need to replace the default value of `auth_mode` within `/terraform/variables.tf` from "Basic" to "x509" and ensure that the `[cert_issuance.est.auth]` section in `cloud-init.yaml` looks like this:
 ```
       [cert_issuance.est.auth]
       #username = "${EST_USERNAME}"

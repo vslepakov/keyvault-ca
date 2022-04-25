@@ -59,6 +59,7 @@ module "appservice" {
   keyvault_url        = module.keyvault.keyvault_url
   acr_id              = module.acr.acr_id
   acr_login_server    = module.acr.acr_login_server
+  auth_mode           = var.auth_mode
 }
 
 module "iot_hub" {

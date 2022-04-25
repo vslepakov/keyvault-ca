@@ -14,9 +14,8 @@ variable "keyvault_url" {
   type = string
 }
 
-variable "authmode" {
+variable "auth_mode" {
   type    = string
-  default = "Basic"
 }
 
 variable "est_username" {
