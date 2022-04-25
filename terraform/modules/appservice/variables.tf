@@ -15,7 +15,7 @@ variable "keyvault_url" {
 }
 
 variable "auth_mode" {
-  type    = string
+  type = string
 }
 
 variable "est_username" {
