@@ -20,13 +20,10 @@ resource "random_id" "prefix" {
   prefix      = "a"
 }
 
-
 locals {
   resource_prefix  = var.resource_prefix == "" ? lower(random_id.prefix.hex) : var.resource_prefix
   issuing_ca       = "${local.resource_prefix}-ca"
   edge_device_name = "${local.resource_prefix}-edge-device"
-  vm_user_name     = var.vm_user_name != "" ? var.vm_user_name : random_string.vm_user_name.result
-  vm_password      = var.vm_password != "" ? var.vm_password : random_string.vm_password.result
 }
 
 resource "azurerm_resource_group" "rg" {

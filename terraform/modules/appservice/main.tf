@@ -9,6 +9,7 @@ resource "random_string" "est_password" {
 locals {
   est_password = var.est_password == "" ? random_string.est_password.result : var.est_password
 }
+
 resource "azurerm_application_insights" "appinsights" {
   name                = "appi-${var.resource_prefix}"
   location            = var.location
