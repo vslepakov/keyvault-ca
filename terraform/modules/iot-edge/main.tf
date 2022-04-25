@@ -2,6 +2,10 @@ locals {
   dns_label_prefix = "${var.resource_prefix}-iot-edge"
 }
 
+locals {
+  vm_password = var.vm_password == "" ? random_string.vm_password.result : var.vm_password
+}
+
 data "local_file" "est_auth_cert" {
   filename = "${path.root}/../Certs/${var.resource_prefix}-cert.pem"
 }
@@ -14,10 +18,6 @@ resource "random_string" "vm_password" {
   length  = 10
   number  = true
   special = true
-}
-
-locals {
-  vm_password = var.vm_password == "" ? random_string.vm_password.result : var.vm_password
 }
 
 resource "azurerm_public_ip" "iot_edge" {
@@ -83,9 +83,7 @@ resource "azurerm_linux_virtual_machine" "iot_edge" {
   provision_vm_agent         = false
   allow_extension_operations = false
   size                       = var.vm_sku
-  network_interface_ids = [
-    azurerm_network_interface.iot_edge.id
-  ]
+  network_interface_ids      = [azurerm_network_interface.iot_edge.id]
 
   custom_data = base64encode(templatefile("modules/iot-edge/cloud-init.yaml", {
     "SCOPE_ID"         = var.dps_scope_id
