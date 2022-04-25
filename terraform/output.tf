@@ -11,5 +11,5 @@ output "est_username" {
 }
 
 output "est_password" {
-  value = var.auth_mode == "Basic" ? module.appservice.est_password: "Not set since user selected certificate authentication"
+  value = var.auth_mode == "Basic" ? module.appservice.est_password : "Not set since user selected certificate authentication"
 }
