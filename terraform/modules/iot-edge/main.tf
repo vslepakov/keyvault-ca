@@ -95,8 +95,8 @@ resource "azurerm_linux_virtual_machine" "iot_edge" {
     "EST_PASSWORD"    = var.est_password
     "VM_USER_NAME"    = var.vm_username
     "RESOURCE_PREFIX" = var.resource_prefix
-    "AUTH_CERTIFICATE"= data.local_file.est_auth_cert.content
-    "AUTH_KEY"        = data.local_file.est_auth_key.content
+    "AUTH_CERTIFICATE"= var.auth_mode == "x509" ? indent(6,data.local_file.est_auth_cert.content) : ""
+    "AUTH_KEY"        = var.auth_mode == "x509" ? indent(6,data.local_file.est_auth_key.content) : ""
   }))
 
   source_image_reference {

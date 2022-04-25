@@ -70,11 +70,11 @@ write_files:
       trusted_certs = ["file:///etc/aziot/est-ca.pem"]
 
       [cert_issuance.est.auth]
-      #username = "${EST_USERNAME}"
-      #password = "${EST_PASSWORD}"
+      username = "${EST_USERNAME}"
+      password = "${EST_PASSWORD}"
 
-      identity_cert = "file:///etc/aziot/estauth.pem"
-      identity_pk = "file:///etc/aziot/estauth.key.pem"
+      #identity_cert = "file:///etc/aziot/estauth.pem"
+      #identity_pk = "file:///etc/aziot/estauth.key.pem"
 
       [cert_issuance.est.urls]
       default = "https://${EST_HOSTNAME}/.well-known/est"
@@ -120,14 +120,8 @@ runcmd:
         sudo cp ./est-ca.pem /etc/aziot/
         rm ./est-ca.pem
 
-        # Copy EST Auth Certificate and EST Auth Key
-        sudo sh -c "cat > estauth.pem << EOF
-        ${AUTH_CERTIFICATE}
-        EOF"
-
-        sudo sh -c "cat > estauth.key.pem << EOF
-        ${AUTH_KEY}
-        EOF"
-
+        echo
+        echo applying configuration to iot edge...
+        
         sudo iotedge config apply
       ) &
