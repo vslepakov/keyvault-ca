@@ -31,10 +31,12 @@ resource "azurerm_key_vault_access_policy" "user_accesspolicy" {
 
 resource "null_resource" "run-api-facade" {
   triggers = {
-    key     = "${local.certs_path}.key"
+    key     = "${local.certs_path}.key.pem"
     csr     = "${local.certs_path}.csr"
     csr_der = "${local.certs_path}.csr.der"
     cert    = "${local.certs_path}-cert"
+    crt     = "${local.certs_path}.crt"
+    certpem = "${local.certs_path}-cert.pem"
   }
 
   provisioner "local-exec" {
@@ -54,8 +56,21 @@ resource "null_resource" "run-api-facade" {
 
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
+    working_dir = "${path.root}/../Certs"
+    when        = create
+    command     = <<EOF
+      set -Eeuo pipefail
+
+      openssl x509 -inform der -in ${self.triggers.cert} -out ${self.triggers.crt}
+      openssl x509 -in ${self.triggers.crt} -out ${self.triggers.certpem}
+    EOF
+  }
+
+  provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
     working_dir = "${path.root}/../KeyvaultCA"
     when        = destroy
     command     = "rm -f ${self.triggers.key} ${self.triggers.csr} ${self.triggers.csr_der} ${self.triggers.cert}"
   }
+
 }
