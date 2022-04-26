@@ -130,6 +130,11 @@ If you want to use `x509` certificate-based authentication, then you would need 
       #username = "${EST_USERNAME}"
       #password = "${EST_PASSWORD}"
       
-      identity_cert = "file:///home/${VM_USER_NAME}/${resource_prefix}-cert.pem"
-      identity_pk = "file:///home/${VM_USER_NAME}/${resource_prefix}.key.pem"
+      identity_cert = "file:///etc/aziot/estauth.pem"
+      identity_pk = "file:///etc/aziot/estauth.key.pem"
 ```
+
+### Pushing code changes to Azure Container Registry
+If you make code changes locally and you are using Terraform to deploy your new code to the container image in Azure Container Registry, then you can ensure these changes are picked up by Terraform by removing the current state of the resource which builds the image using the following command: `terraform state rm 'module.acr.null_resource.push-docker'`
+
+After that, you can run `terraform apply` such that the az command which pushes the code to ACR will run again.

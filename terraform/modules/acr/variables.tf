@@ -9,3 +9,7 @@ variable "location" {
 variable "resource_prefix" {
   type = string
 }
+
+variable "null_resource_dps_id" {
+  type = string
+}

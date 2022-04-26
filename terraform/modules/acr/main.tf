@@ -10,4 +10,5 @@ resource "null_resource" "push-docker" {
   provisioner "local-exec" {
     command = "az acr build -r ${azurerm_container_registry.acr.name} -t estserver:latest ../ -f ../KeyVaultCA.Web/Dockerfile"
   }
+  depends_on = [var.null_resource_dps_id]
 }

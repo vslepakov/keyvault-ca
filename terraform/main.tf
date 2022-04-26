@@ -43,10 +43,11 @@ module "keyvault" {
 }
 
 module "acr" {
-  source              = "./modules/acr"
-  resource_group_name = azurerm_resource_group.rg.name
-  location            = var.location
-  resource_prefix     = local.resource_prefix
+  source               = "./modules/acr"
+  resource_group_name  = azurerm_resource_group.rg.name
+  location             = var.location
+  resource_prefix      = local.resource_prefix
+  null_resource_dps_id = module.iot_hub.null_resource_dps_id
 }
 
 module "appservice" {
