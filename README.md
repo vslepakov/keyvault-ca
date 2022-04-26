@@ -129,17 +129,17 @@ After that, you can run `terraform apply` such that the az command which pushes 
 
 ## Authenticating to the EST server using certificates
 ### Terraform
-The authentication mode is currently set at `Basic`, with default username for both the VM and EST set at `azureuser`, the passwords will be randomly generated and shown as outputs (together with the usernames) for testing purposes. If you would like to change these values you can provide other default values in the `variables.tf` files for both the `iot-edge` and `appservice` module. 
+The authentication mode is currently set to be `x509`, which means using certificates for authenticating to the EST server.
 
-If you want to use `x509` certificate-based authentication, then you would need to replace the default value of `auth_mode` within `/terraform/variables.tf` from "Basic" to "x509" and ensure that the `[cert_issuance.est.auth]` section in `cloud-init.yaml` looks like this:
+If you want to use `Basic` authentication with username and password, then you would need to replace the default value of `auth_mode` within `/terraform/variables.tf` from `"x509"` to `"Basic"` and ensure that the `[cert_issuance.est.auth]` section in `cloud-init.yaml` looks like this:
 ```
       [cert_issuance.est.auth]
-      #username = "${EST_USERNAME}"
-      #password = "${EST_PASSWORD}"
+      username = "${EST_USERNAME}"
+      password = "${EST_PASSWORD}"
       
-      identity_cert = "file:///etc/aziot/estauth.pem"
-      identity_pk = "file:///etc/aziot/estauth.key.pem"
+      #identity_cert = "file:///etc/aziot/estauth.pem"
+      #identity_pk = "file:///etc/aziot/estauth.key.pem"
 ```
 
 ### Using ForwardedHeaders
-When the user selects the certificate authentication mode for EST server, the code uses [Header Forwarding](https://github.com/machteldbogels/keyvault-ca/blob/master/KeyVaultCA.Web/Startup.cs#L107) to forward the used protocol to the App Service and ensure that the client certificate is negotiated as part of a TLS handshake. If the user decides to use something other than an App Service to deploy the code, then this header forwarding could be removed as it is no longer needed. More information can be found [here](https://docs.microsoft.com/en-us/aspnet/core/host-and-deploy/proxy-load-balancer?view=aspnetcore-6.0#forwarded-headers).
+When the user selects the certificate authentication mode for EST server, the code uses [Header Forwarding](https://github.com/machteldbogels/keyvault-ca/blob/master/KeyVaultCA.Web/Startup.cs#L107) to forward the used protocol to the App Service and ensure that the client certificate is negotiated as part of a TLS handshake. More details on the usage of header forwarding can be found [here](https://docs.microsoft.com/en-us/aspnet/core/host-and-deploy/proxy-load-balancer?view=aspnetcore-6.0#forwarded-headers).

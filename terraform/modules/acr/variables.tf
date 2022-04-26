@@ -10,6 +10,6 @@ variable "resource_prefix" {
   type = string
 }
 
-variable "null_resource_dps_id" {
+variable "dps_rootca_enroll_null_resource_id" {
   type = string
 }

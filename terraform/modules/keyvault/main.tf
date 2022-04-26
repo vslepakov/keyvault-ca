@@ -66,6 +66,6 @@ resource "null_resource" "run-api-facade" {
     interpreter = ["/bin/bash", "-c"]
     working_dir = "${path.root}/../KeyvaultCA"
     when        = destroy
-    command     = "rm -f ${self.triggers.key} ${self.triggers.csr} ${self.triggers.csr_der} ${self.triggers.cert}"
+    command     = "rm -f ${self.triggers.key} ${self.triggers.csr} ${self.triggers.csr_der} ${self.triggers.cert} ${self.triggers.crt} ${self.triggers.certpem}"
   }
 }
