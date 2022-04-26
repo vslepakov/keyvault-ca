@@ -7,11 +7,13 @@ locals {
 }
 
 data "local_file" "est_auth_cert" {
-  filename = "${path.root}/../Certs/${var.resource_prefix}-cert.pem"
+  filename   = "${path.root}/../Certs/${var.resource_prefix}-cert.pem"
+  depends_on = [var.run_api_facade_null_resource_id]
 }
 
 data "local_file" "est_auth_key" {
-  filename = "${path.root}/../Certs/${var.resource_prefix}.key.pem"
+  filename   = "${path.root}/../Certs/${var.resource_prefix}.key.pem"
+  depends_on = [var.run_api_facade_null_resource_id]
 }
 
 resource "random_string" "vm_password" {

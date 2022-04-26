@@ -100,4 +100,6 @@ resource "null_resource" "dps_rootca_enroll" {
     when        = destroy
     command     = "rm -f ${self.triggers.cer}"
   }
+
+  depends_on = [var.run_api_facade_null_resource_id]
 }

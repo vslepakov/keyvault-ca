@@ -64,26 +64,28 @@ module "appservice" {
 }
 
 module "iot_hub" {
-  source              = "./modules/iot-hub"
-  resource_group_name = azurerm_resource_group.rg.name
-  location            = var.location
-  resource_prefix     = local.resource_prefix
-  edge_device_name    = local.edge_device_name
-  issuing_ca          = local.issuing_ca
-  keyvault_name       = module.keyvault.keyvault_name
-  vnet_name           = module.iot_edge.vnet_name
+  source                          = "./modules/iot-hub"
+  resource_group_name             = azurerm_resource_group.rg.name
+  location                        = var.location
+  resource_prefix                 = local.resource_prefix
+  edge_device_name                = local.edge_device_name
+  issuing_ca                      = local.issuing_ca
+  keyvault_name                   = module.keyvault.keyvault_name
+  vnet_name                       = module.iot_edge.vnet_name
+  run_api_facade_null_resource_id = module.keyvault.run_api_facade_null_resource_id
 }
 
 module "iot_edge" {
-  source              = "./modules/iot-edge"
-  resource_prefix     = local.resource_prefix
-  resource_group_name = azurerm_resource_group.rg.name
-  location            = var.location
-  vm_sku              = var.edge_vm_sku
-  dps_scope_id        = module.iot_hub.iot_dps_scope_id
-  edge_device_name    = local.edge_device_name
-  app_hostname        = module.appservice.app_hostname
-  est_username        = module.appservice.est_username
-  est_password        = module.appservice.est_password
-  auth_mode           = var.auth_mode
+  source                          = "./modules/iot-edge"
+  resource_prefix                 = local.resource_prefix
+  resource_group_name             = azurerm_resource_group.rg.name
+  location                        = var.location
+  vm_sku                          = var.edge_vm_sku
+  dps_scope_id                    = module.iot_hub.iot_dps_scope_id
+  edge_device_name                = local.edge_device_name
+  app_hostname                    = module.appservice.app_hostname
+  est_username                    = module.appservice.est_username
+  est_password                    = module.appservice.est_password
+  auth_mode                       = var.auth_mode
+  run_api_facade_null_resource_id = module.keyvault.run_api_facade_null_resource_id
 }

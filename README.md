@@ -122,12 +122,8 @@ The `KeyVaultCA.Web` writes logs to an Azure Application Insights instance, for 
 
 The Terraform scripts listed under the `terraform` directory can be used to deploy the infrastructure required for E2E testing to an Azure environment. This deployment includes an App Service for the EST server to run in using an image pulled from Azure Container Registry, an Azure Key Vault for storing the Root CA and an IoT Hub, Device Provisioning Service and a Linux VM simulating an IoT Edge device. The Terraform template uses `dotnet run` to execute the API Facade Console App, hence installing the [.NET Runtime 6](https://dotnet.microsoft.com/en-us/download/dotnet/6.0) is required. The infrastructure can be deployed by cd'ing into the `terraform` directory and then running `terraform init` followed by `terraform apply`. Terraform will use the [logged in Azure user credentials](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/guides/azure_cli) and subsequent subscription to deploy the resources to.
 
-### Pushing code changes to Azure Container Registry
-If you make code changes locally and you are using Terraform to deploy your new code to the container image in Azure Container Registry, then you can ensure these changes are picked up by Terraform by removing the current state of the resource which builds the image using the following command: `terraform state rm 'module.acr.null_resource.push-docker'`
-
-After that, you can run `terraform apply` such that the az command which pushes the code to ACR will run again.
-
 ## Authenticating to the EST server using certificates
+
 ### Terraform
 The authentication mode is currently set to be `x509`, which means using certificates for authenticating to the EST server.
 
