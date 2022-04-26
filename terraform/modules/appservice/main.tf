@@ -37,8 +37,8 @@ resource "azurerm_linux_web_app" "appservice" {
     container_registry_use_managed_identity = true
 
     application_stack {
-      docker_image     = "${var.acr_login_server}/sample/estserver"
-      docker_image_tag = "v2"
+      docker_image     = "${var.acr_login_server}/estserver"
+      docker_image_tag = "latest"
     }
   }
 
