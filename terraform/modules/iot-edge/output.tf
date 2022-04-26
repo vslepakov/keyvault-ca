@@ -13,7 +13,3 @@ output "vm_username" {
 output "vm_password" {
   value = local.vm_password
 }
-
-# output "est_auth_cert" {
-#   value = data.local_file.est_auth_cert.content
-# }
