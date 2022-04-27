@@ -9,3 +9,7 @@ variable "location" {
 variable "resource_prefix" {
   type = string
 }
+
+variable "dps_rootca_enroll_null_resource_id" {
+  type = string
+}

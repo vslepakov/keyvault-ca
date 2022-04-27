@@ -20,7 +20,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Folder Include="TrustedCAs\" />
+		<None Update="TrustedCAs\ContosoRootCA.cer">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
 	</ItemGroup>
 
 	<ItemGroup>

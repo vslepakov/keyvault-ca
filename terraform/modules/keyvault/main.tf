@@ -20,21 +20,19 @@ resource "azurerm_key_vault_access_policy" "user_accesspolicy" {
   tenant_id    = data.azurerm_client_config.current.tenant_id
   object_id    = data.azurerm_client_config.current.object_id
 
-  key_permissions = [
-    "Sign"
-  ]
+  key_permissions = ["Sign"]
 
-  certificate_permissions = [
-    "Get", "List", "Update", "Create", "Import", "Delete", "Recover", "Backup", "Restore", "ManageIssuers", "GetIssuers", "ListIssuers", "SetIssuers", "DeleteIssuers"
-  ]
+  certificate_permissions = ["Get", "List", "Update", "Create", "Import", "Delete", "Recover", "Backup", "Restore", "ManageIssuers", "GetIssuers", "ListIssuers", "SetIssuers", "DeleteIssuers"]
 }
 
-resource "null_resource" "run-api-facade" {
+resource "null_resource" "run_api_facade" {
   triggers = {
-    key     = "${local.certs_path}.key"
-    csr     = "${local.certs_path}.csr"
-    csr_der = "${local.certs_path}.csr.der"
-    cert    = "${local.certs_path}-cert"
+    key      = "${local.certs_path}.key.pem"
+    csr      = "${local.certs_path}.csr"
+    csr_der  = "${local.certs_path}.csr.der"
+    cert_raw = "${local.certs_path}-cert"
+    cert_crt = "${local.certs_path}.crt"
+    cert_pem = "${local.certs_path}-cert.pem"
   }
 
   provisioner "local-exec" {
@@ -48,7 +46,19 @@ resource "null_resource" "run-api-facade" {
       openssl genrsa -out ${self.triggers.key} 2048
       openssl req -new -key ${self.triggers.key} -subj "/C=US/ST=WA/L=Redmond/O=Contoso/CN=Contoso Inc" -out ${self.triggers.csr}
       openssl req -in ${self.triggers.csr} -out ${self.triggers.csr_der} -outform DER
-      dotnet run --Csr:IsRootCA false --Csr:PathToCsr ${self.triggers.csr_der} --Csr:OutputFileName ${self.triggers.cert} --Keyvault:IssuingCA ${var.issuing_ca} --Keyvault:KeyVaultUrl ${azurerm_key_vault.keyvault-ca.vault_uri}
+      dotnet run --Csr:IsRootCA false --Csr:PathToCsr ${self.triggers.csr_der} --Csr:OutputFileName ${self.triggers.cert_raw} --Keyvault:IssuingCA ${var.issuing_ca} --Keyvault:KeyVaultUrl ${azurerm_key_vault.keyvault-ca.vault_uri}
+    EOF
+  }
+
+  provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
+    working_dir = "${path.root}/../Certs"
+    when        = create
+    command     = <<EOF
+      set -Eeuo pipefail
+
+      openssl x509 -inform der -in ${self.triggers.cert_raw} -out ${self.triggers.cert_crt}
+      openssl x509 -in ${self.triggers.cert_crt} -out ${self.triggers.cert_pem}
     EOF
   }
 
@@ -56,6 +66,6 @@ resource "null_resource" "run-api-facade" {
     interpreter = ["/bin/bash", "-c"]
     working_dir = "${path.root}/../KeyvaultCA"
     when        = destroy
-    command     = "rm -f ${self.triggers.key} ${self.triggers.csr} ${self.triggers.csr_der} ${self.triggers.cert}"
+    command     = "rm -f ${self.triggers.key} ${self.triggers.csr} ${self.triggers.csr_der} ${self.triggers.cert_raw} ${self.triggers.cert_crt} ${self.triggers.cert_pem}"
   }
 }

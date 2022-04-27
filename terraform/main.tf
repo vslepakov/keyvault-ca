@@ -12,6 +12,9 @@ provider "azurerm" {
     key_vault {
       purge_soft_delete_on_destroy = true
     }
+    resource_group {
+      prevent_deletion_if_contains_resources = false
+    }
   }
 }
 
@@ -20,23 +23,10 @@ resource "random_id" "prefix" {
   prefix      = "a"
 }
 
-resource "random_string" "vm_user_name" {
-  length  = 10
-  special = false
-}
-
-resource "random_string" "vm_password" {
-  length  = 10
-  number  = true
-  special = true
-}
-
 locals {
   resource_prefix  = var.resource_prefix == "" ? lower(random_id.prefix.hex) : var.resource_prefix
-  issuing_ca       = "${local.resource_prefix}-ca"
+  issuing_ca       = "ContosoRootCA"
   edge_device_name = "${local.resource_prefix}-edge-device"
-  vm_user_name     = var.vm_user_name != "" ? var.vm_user_name : random_string.vm_user_name.result
-  vm_password      = var.vm_password != "" ? var.vm_password : random_string.vm_password.result
 }
 
 resource "azurerm_resource_group" "rg" {
@@ -53,10 +43,11 @@ module "keyvault" {
 }
 
 module "acr" {
-  source              = "./modules/acr"
-  resource_group_name = azurerm_resource_group.rg.name
-  location            = var.location
-  resource_prefix     = local.resource_prefix
+  source                             = "./modules/acr"
+  resource_group_name                = azurerm_resource_group.rg.name
+  location                           = var.location
+  resource_prefix                    = local.resource_prefix
+  dps_rootca_enroll_null_resource_id = module.iot_hub.dps_rootca_enroll_null_resource_id
 }
 
 module "appservice" {
@@ -69,30 +60,32 @@ module "appservice" {
   keyvault_url        = module.keyvault.keyvault_url
   acr_id              = module.acr.acr_id
   acr_login_server    = module.acr.acr_login_server
+  auth_mode           = var.auth_mode
 }
 
 module "iot_hub" {
-  source              = "./modules/iot-hub"
-  resource_group_name = azurerm_resource_group.rg.name
-  location            = var.location
-  resource_prefix     = local.resource_prefix
-  edge_device_name    = local.edge_device_name
-  issuing_ca          = local.issuing_ca
-  keyvault_name       = module.keyvault.keyvault_name
-  vnet_name           = module.iot_edge.vnet_name
+  source                          = "./modules/iot-hub"
+  resource_group_name             = azurerm_resource_group.rg.name
+  location                        = var.location
+  resource_prefix                 = local.resource_prefix
+  edge_device_name                = local.edge_device_name
+  issuing_ca                      = local.issuing_ca
+  keyvault_name                   = module.keyvault.keyvault_name
+  vnet_name                       = module.iot_edge.vnet_name
+  run_api_facade_null_resource_id = module.keyvault.run_api_facade_null_resource_id
 }
 
 module "iot_edge" {
-  source              = "./modules/iot-edge"
-  resource_prefix     = local.resource_prefix
-  resource_group_name = azurerm_resource_group.rg.name
-  location            = var.location
-  vm_user_name        = local.vm_user_name
-  vm_password         = local.vm_password
-  vm_sku              = var.edge_vm_sku
-  dps_scope_id        = module.iot_hub.iot_dps_scope_id
-  edge_device_name    = local.edge_device_name
-  app_hostname        = module.appservice.app_hostname
-  est_user            = module.appservice.est_user
-  est_password        = module.appservice.est_password
+  source                          = "./modules/iot-edge"
+  resource_prefix                 = local.resource_prefix
+  resource_group_name             = azurerm_resource_group.rg.name
+  location                        = var.location
+  vm_sku                          = var.edge_vm_sku
+  dps_scope_id                    = module.iot_hub.iot_dps_scope_id
+  edge_device_name                = local.edge_device_name
+  app_hostname                    = module.appservice.app_hostname
+  est_username                    = module.appservice.est_username
+  est_password                    = module.appservice.est_password
+  auth_mode                       = var.auth_mode
+  run_api_facade_null_resource_id = module.keyvault.run_api_facade_null_resource_id
 }

@@ -8,17 +8,12 @@ variable "resource_prefix" {
   default = ""
 }
 
-variable "vm_user_name" {
-  type    = string
-  default = "azureuser"
-}
-
-variable "vm_password" {
-  type    = string
-  default = ""
-}
-
 variable "edge_vm_sku" {
   type    = string
   default = "Standard_DS1_v2"
+}
+
+variable "auth_mode" {
+  type    = string
+  default = "x509"
 }

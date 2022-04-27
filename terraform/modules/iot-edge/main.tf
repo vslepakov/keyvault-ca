@@ -2,6 +2,26 @@ locals {
   dns_label_prefix = "${var.resource_prefix}-iot-edge"
 }
 
+locals {
+  vm_password = var.vm_password == "" ? random_string.vm_password.result : var.vm_password
+}
+
+data "local_file" "est_auth_cert" {
+  filename   = "${path.root}/../Certs/${var.resource_prefix}-cert.pem"
+  depends_on = [var.run_api_facade_null_resource_id]
+}
+
+data "local_file" "est_auth_key" {
+  filename   = "${path.root}/../Certs/${var.resource_prefix}.key.pem"
+  depends_on = [var.run_api_facade_null_resource_id]
+}
+
+resource "random_string" "vm_password" {
+  length  = 10
+  number  = true
+  special = true
+}
+
 resource "azurerm_public_ip" "iot_edge" {
   name                = "pip-${local.dns_label_prefix}"
   resource_group_name = var.resource_group_name
@@ -58,25 +78,25 @@ resource "azurerm_linux_virtual_machine" "iot_edge" {
   name                            = "vm${var.edge_device_name}"
   location                        = var.location
   resource_group_name             = var.resource_group_name
-  admin_username                  = var.vm_user_name
+  admin_username                  = var.vm_username
   disable_password_authentication = false
-  admin_password                  = var.vm_password
+  admin_password                  = local.vm_password
 
   provision_vm_agent         = false
   allow_extension_operations = false
   size                       = var.vm_sku
-  network_interface_ids = [
-    azurerm_network_interface.iot_edge.id
-  ]
+  network_interface_ids      = [azurerm_network_interface.iot_edge.id]
 
   custom_data = base64encode(templatefile("modules/iot-edge/cloud-init.yaml", {
-    "SCOPE_ID"        = var.dps_scope_id
-    "DEVICE_ID"       = var.edge_device_name
-    "EST_HOSTNAME"    = var.app_hostname
-    "EST_USERNAME"    = var.est_user
-    "EST_PASSWORD"    = var.est_password
-    "VM_USER_NAME"    = var.vm_user_name
-    "RESOURCE_PREFIX" = var.resource_prefix
+    "SCOPE_ID"         = var.dps_scope_id
+    "DEVICE_ID"        = var.edge_device_name
+    "EST_HOSTNAME"     = var.app_hostname
+    "EST_USERNAME"     = var.est_username
+    "EST_PASSWORD"     = var.est_password
+    "VM_USER_NAME"     = var.vm_username
+    "RESOURCE_PREFIX"  = var.resource_prefix
+    "AUTH_CERTIFICATE" = var.auth_mode == "x509" ? indent(6, data.local_file.est_auth_cert.content) : ""
+    "AUTH_KEY"         = var.auth_mode == "x509" ? indent(6, data.local_file.est_auth_key.content) : ""
   }))
 
   source_image_reference {

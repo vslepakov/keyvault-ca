@@ -25,3 +25,7 @@ variable "keyvault_name" {
 variable "vnet_name" {
   type = string
 }
+
+variable "run_api_facade_null_resource_id" {
+  type = string
+}

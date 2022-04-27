@@ -30,6 +30,16 @@ packages:
   - libiothsm-std
   - moby-engine
 write_files:
+  - path: /etc/aziot/estauth.pem
+    permissions: '0444'
+    owner: root:root
+    content: |
+      ${AUTH_CERTIFICATE}
+  - path: /etc/aziot/estauth.key.pem
+    permissions: '0444'
+    owner: root:root
+    content: |
+      ${AUTH_KEY}
   - path: /etc/aziot/config.toml
     permissions: '0444'
     owner: root:root
@@ -60,11 +70,11 @@ write_files:
       trusted_certs = ["file:///etc/aziot/est-ca.pem"]
 
       [cert_issuance.est.auth]
-      username = "${EST_USERNAME}"
-      password = "${EST_PASSWORD}"
+      #username = "${EST_USERNAME}"
+      #password = "${EST_PASSWORD}"
 
-      #identity_cert = "file:///home/${VM_USER_NAME}/${RESOURCE_PREFIX}-cert.pem"
-      #identity_pk = "file:///home/${VM_USER_NAME}/${RESOURCE_PREFIX}.key.pem"
+      identity_cert = "file:///etc/aziot/estauth.pem"
+      identity_pk = "file:///etc/aziot/estauth.key.pem"
 
       [cert_issuance.est.urls]
       default = "https://${EST_HOSTNAME}/.well-known/est"
