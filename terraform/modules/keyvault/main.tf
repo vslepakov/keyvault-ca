@@ -27,12 +27,12 @@ resource "azurerm_key_vault_access_policy" "user_accesspolicy" {
 
 resource "null_resource" "run_api_facade" {
   triggers = {
-    key           = "${local.certs_path}.key.pem"
-    csr           = "${local.certs_path}.csr"
-    csr_der       = "${local.certs_path}.csr.der"
-    cert_crt      = "${local.certs_path}.crt"
-    cert_pem      = "${local.certs_path}-cert.pem"
-    crt_file_name = "${local.certs_path}-cert"
+    key      = "${local.certs_path}.key.pem"
+    csr      = "${local.certs_path}.csr"
+    csr_der  = "${local.certs_path}.csr.der"
+    cert_raw = "${local.certs_path}-cert"
+    cert_crt = "${local.certs_path}.crt"
+    cert_pem = "${local.certs_path}-cert.pem"
   }
 
   provisioner "local-exec" {
@@ -46,7 +46,7 @@ resource "null_resource" "run_api_facade" {
       openssl genrsa -out ${self.triggers.key} 2048
       openssl req -new -key ${self.triggers.key} -subj "/C=US/ST=WA/L=Redmond/O=Contoso/CN=Contoso Inc" -out ${self.triggers.csr}
       openssl req -in ${self.triggers.csr} -out ${self.triggers.csr_der} -outform DER
-      dotnet run --Csr:IsRootCA false --Csr:PathToCsr ${self.triggers.csr_der} --Csr:OutputFileName ${self.triggers.crt_file_name} --Keyvault:IssuingCA ${var.issuing_ca} --Keyvault:KeyVaultUrl ${azurerm_key_vault.keyvault-ca.vault_uri}
+      dotnet run --Csr:IsRootCA false --Csr:PathToCsr ${self.triggers.csr_der} --Csr:OutputFileName ${self.triggers.cert_raw} --Keyvault:IssuingCA ${var.issuing_ca} --Keyvault:KeyVaultUrl ${azurerm_key_vault.keyvault-ca.vault_uri}
     EOF
   }
 
@@ -57,7 +57,7 @@ resource "null_resource" "run_api_facade" {
     command     = <<EOF
       set -Eeuo pipefail
 
-      openssl x509 -inform der -in ${self.triggers.crt_file_name} -out ${self.triggers.cert_crt}
+      openssl x509 -inform der -in ${self.triggers.cert_raw} -out ${self.triggers.cert_crt}
       openssl x509 -in ${self.triggers.cert_crt} -out ${self.triggers.cert_pem}
     EOF
   }
@@ -66,6 +66,6 @@ resource "null_resource" "run_api_facade" {
     interpreter = ["/bin/bash", "-c"]
     working_dir = "${path.root}/../KeyvaultCA"
     when        = destroy
-    command     = "rm -f ${self.triggers.key} ${self.triggers.csr} ${self.triggers.csr_der} ${self.triggers.crt_file_name} ${self.triggers.cert_crt} ${self.triggers.cert_pem}"
+    command     = "rm -f ${self.triggers.key} ${self.triggers.csr} ${self.triggers.csr_der} ${self.triggers.cert_raw} ${self.triggers.cert_crt} ${self.triggers.cert_pem}"
   }
 }
