@@ -10,10 +10,14 @@ variable "resource_uid" {
   type = string
 }
 
-variable "app_princ_id" {
+variable "vnet_name" {
   type = string
 }
 
-variable "issuing_ca" {
+variable "vnet_id" {
+  type = string
+}
+
+variable "keyvault_id" {
   type = string
 }

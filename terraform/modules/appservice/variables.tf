@@ -6,11 +6,7 @@ variable "location" {
   type = string
 }
 
-variable "resource_prefix" {
-  type = string
-}
-
-variable "keyvault_url" {
+variable "resource_uid" {
   type = string
 }
 
@@ -37,14 +33,14 @@ variable "cert_validity_in_days" {
   default = "365"
 }
 
-variable "acr_id" {
-  type = string
-}
-
 variable "acr_login_server" {
   type = string
 }
 
-variable "keyvault_id" {
+variable "keyvault_url" {
+  type = string
+}
+
+variable "keyvault_name" {
   type = string
 }

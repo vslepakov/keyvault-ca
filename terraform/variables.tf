@@ -3,7 +3,7 @@ variable "location" {
   default = "westeurope"
 }
 
-variable "resource_prefix" {
+variable "resource_uid" {
   type    = string
   default = ""
 }
