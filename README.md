@@ -119,7 +119,7 @@ The `KeyVaultCA` console app uses a Console logger, for which the severity can b
 The `KeyVaultCA.Web` writes logs to an Azure Application Insights instance, for which the connection string must be added in the `appsettings.json`. Additionally, the logging must be turned on from the Azure portal by going to the Web App and into the Application Insights settings.
 
 ## Infrastructure as code
-Detailed instructions for using the Terraform scripts can be found [here.](https://github.com/machteldbogels/keyvault-ca/tree/master/terraform)
+Detailed instructions for using the Terraform scripts can be found [here.](https://github.com/vslepakov/keyvault-ca/tree/master/terraform)
 
 ## Authenticating to the EST server using certificates
 ### Using ForwardedHeaders
