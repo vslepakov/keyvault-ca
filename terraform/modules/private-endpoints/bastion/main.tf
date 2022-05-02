@@ -11,7 +11,7 @@ resource "azurerm_network_security_group" "bastion_nsg" {
   location            = var.location
 
   security_rule {
-    name                       = "AllowGatewayManager"
+    name                       = "nsgsr-AllowGatewayManager"
     priority                   = 2702
     direction                  = "Inbound"
     access                     = "Allow"
@@ -23,7 +23,7 @@ resource "azurerm_network_security_group" "bastion_nsg" {
   }
 
   security_rule {
-    name                       = "AllowHttpsInBound"
+    name                       = "nsgsr-AllowHttpsInBound"
     priority                   = 2703
     direction                  = "Inbound"
     access                     = "Allow"
@@ -35,7 +35,7 @@ resource "azurerm_network_security_group" "bastion_nsg" {
   }
 
   security_rule {
-    name                       = "AllowSshRdpOutbound"
+    name                       = "nsgsr-AllowSshRdpOutbound"
     priority                   = 100
     direction                  = "Outbound"
     access                     = "Allow"
@@ -47,7 +47,7 @@ resource "azurerm_network_security_group" "bastion_nsg" {
   }
 
   security_rule {
-    name                       = "AllowAzureCloudOutbound"
+    name                       = "nsgsr-AllowAzureCloudOutbound"
     priority                   = 110
     direction                  = "Outbound"
     access                     = "Allow"
@@ -73,7 +73,7 @@ resource "azurerm_public_ip" "public_ip" {
 }
 
 resource "azurerm_bastion_host" "bastion" {
-  name                = "host-bastion-${var.resource_uid}"
+  name                = "bas-${var.resource_uid}"
   location            = var.location
   resource_group_name = var.resource_group_name
 

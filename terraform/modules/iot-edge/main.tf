@@ -36,7 +36,7 @@ resource "azurerm_network_security_group" "iot_edge" {
   location            = var.location
 
   security_rule {
-    name                       = "AllowBastionInbound"
+    name                       = "nsgsr-AllowBastionInbound"
     priority                   = 900
     access                     = "Allow"
     direction                  = "Inbound"
@@ -48,7 +48,7 @@ resource "azurerm_network_security_group" "iot_edge" {
   }
 
   security_rule {
-    name                       = "Default-Deny-22"
+    name                       = "nsgsr-Default-Deny-22"
     priority                   = 1000
     access                     = "Deny"
     direction                  = "Inbound"
