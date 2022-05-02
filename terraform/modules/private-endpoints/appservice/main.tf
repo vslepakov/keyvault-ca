@@ -2,7 +2,7 @@ resource "azurerm_subnet" "app_subnet" {
   name                 = "snet-app"
   resource_group_name  = var.resource_group_name
   virtual_network_name = var.vnet_name
-  address_prefixes     = ["10.0.5.0/24"]
+  address_prefixes     = [cidrsubnet(var.cidr_prefix,8,5)]
 
   enforce_private_link_endpoint_network_policies = true
 }
@@ -22,7 +22,7 @@ resource "azurerm_subnet" "app_vnet_integration_subnet" {
   name                 = "snet-app-vnet-integration"
   resource_group_name  = var.resource_group_name
   virtual_network_name = var.vnet_name
-  address_prefixes     = ["10.0.6.0/24"]
+  address_prefixes     = [cidrsubnet(var.cidr_prefix,8,6)]
 
   delegation {
     name = "delegation"
@@ -51,7 +51,7 @@ resource "azurerm_private_dns_a_record" "app_dns_a_record" {
   zone_name           = azurerm_private_dns_zone.app_dns_zone.name
   resource_group_name = var.resource_group_name
   ttl                 = 300
-  records             = ["10.0.5.1"]
+  records             = [cidrhost(azurerm_subnet.app_subnet.address_prefixes[0],1)]
 }
 
 resource "azurerm_private_endpoint" "app_private_endpoint" {

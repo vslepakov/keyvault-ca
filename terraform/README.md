@@ -8,6 +8,8 @@ The Azure resources deployed through Terraform include VNet integration and priv
 
 ![Overview](../assets/vnet-arch.jpg "VNet Architecture")
 
+Each private endpoint is located inside 'their own' subnet to ensure the ability to create security rules for each resource individually, except for the endpoints for IoT Hub and DPS since (in this case) traffic towards DPS is also expected to go into IoT Hub.
+
 ### Disabling public network access
 When reusing these Terraform scripts, please be informed that public network access for ACR, Device Provisioning Service and Key Vault is enabled while running the scripts. This is necessary to configure the resources properly (i.e. downloading the certificate from Key Vault and then uploading to DPS) from the (local) machine where the scripts are executed. Public network access is then disabled for each service using Azure CLI commands as the last step of the deployment.
 

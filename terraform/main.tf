@@ -26,6 +26,7 @@ resource "random_id" "resource_uid" {
 locals {
   resource_uid     = var.resource_uid == "" ? lower(random_id.resource_uid.hex) : var.resource_uid
   issuing_ca       = "ContosoRootCA"
+  cidr_prefix      = "10.0.0.0/16"
   edge_device_name = "${local.resource_uid}-edge-device"
 }
 
@@ -70,6 +71,7 @@ module "iot_edge" {
   source                          = "./modules/iot-edge"
   resource_uid                    = local.resource_uid
   resource_group_name             = azurerm_resource_group.rg.name
+  cidr_prefix                     = local.cidr_prefix 
   location                        = var.location
   vm_sku                          = var.edge_vm_sku
   dps_scope_id                    = module.iot_hub_dps.iot_dps_scope_id
@@ -97,6 +99,7 @@ module "keyvault" {
 ## If preferred to deploy the infrastructure without private endpoints then the below sections can be removed
 module "private-endpoint-acr" {
   source                        = "./modules/private-endpoints/acr"
+  cidr_prefix                   = local.cidr_prefix
   resource_uid                  = local.resource_uid
   resource_group_name           = azurerm_resource_group.rg.name
   location                      = var.location
@@ -109,6 +112,7 @@ module "private-endpoint-acr" {
 
 module "private-endpoint-appservice" {
   source              = "./modules/private-endpoints/appservice"
+  cidr_prefix                   = local.cidr_prefix
   resource_uid        = local.resource_uid
   resource_group_name = azurerm_resource_group.rg.name
   location            = var.location
@@ -119,6 +123,7 @@ module "private-endpoint-appservice" {
 
 module "private-endpoint-bastion" {
   source              = "./modules/private-endpoints/bastion"
+  cidr_prefix                   = local.cidr_prefix
   resource_uid        = local.resource_uid
   resource_group_name = azurerm_resource_group.rg.name
   location            = var.location
@@ -128,6 +133,7 @@ module "private-endpoint-bastion" {
 
 module "private-endpoint-iot-hub-dps" {
   source                             = "./modules/private-endpoints/iot-hub-dps"
+  cidr_prefix                   = local.cidr_prefix
   resource_uid                       = local.resource_uid
   resource_group_name                = azurerm_resource_group.rg.name
   location                           = var.location
@@ -141,6 +147,7 @@ module "private-endpoint-iot-hub-dps" {
 
 module "private-endpoint-keyvault" {
   source              = "./modules/private-endpoints/keyvault"
+  cidr_prefix                   = local.cidr_prefix
   resource_uid        = local.resource_uid
   resource_group_name = azurerm_resource_group.rg.name
   location            = var.location
