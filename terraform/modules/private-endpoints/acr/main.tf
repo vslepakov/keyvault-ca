@@ -6,7 +6,7 @@ resource "azurerm_subnet" "acr_subnet" {
   name                 = "snet-acr"
   resource_group_name  = var.resource_group_name
   virtual_network_name = var.vnet_name
-  address_prefixes     = [cidrsubnet(local.cidr_prefix,8,4)]
+  address_prefixes     = [cidrsubnet(local.cidr_prefix, 8, 4)]
 
   enforce_private_link_endpoint_network_policies = true
 }
@@ -39,7 +39,7 @@ resource "azurerm_private_dns_a_record" "acr_dns_a_record" {
   zone_name           = azurerm_private_dns_zone.acr_dns_zone.name
   resource_group_name = var.resource_group_name
   ttl                 = 300
-  records             = [cidrhost(azurerm_subnet.acr_subnet.address_prefixes[0],1)]
+  records             = [cidrhost(azurerm_subnet.acr_subnet.address_prefixes[0], 1)]
 }
 
 resource "azurerm_private_endpoint" "acr_private_endpoint" {

@@ -71,7 +71,7 @@ module "iot_edge" {
   source                          = "./modules/iot-edge"
   resource_uid                    = local.resource_uid
   resource_group_name             = azurerm_resource_group.rg.name
-  cidr_prefix                     = local.cidr_prefix 
+  cidr_prefix                     = local.cidr_prefix
   location                        = var.location
   vm_sku                          = var.edge_vm_sku
   dps_scope_id                    = module.iot_hub_dps.iot_dps_scope_id
@@ -112,7 +112,7 @@ module "private-endpoint-acr" {
 
 module "private-endpoint-appservice" {
   source              = "./modules/private-endpoints/appservice"
-  cidr_prefix                   = local.cidr_prefix
+  cidr_prefix         = local.cidr_prefix
   resource_uid        = local.resource_uid
   resource_group_name = azurerm_resource_group.rg.name
   location            = var.location
@@ -123,7 +123,7 @@ module "private-endpoint-appservice" {
 
 module "private-endpoint-bastion" {
   source              = "./modules/private-endpoints/bastion"
-  cidr_prefix                   = local.cidr_prefix
+  cidr_prefix         = local.cidr_prefix
   resource_uid        = local.resource_uid
   resource_group_name = azurerm_resource_group.rg.name
   location            = var.location
@@ -133,7 +133,7 @@ module "private-endpoint-bastion" {
 
 module "private-endpoint-iot-hub-dps" {
   source                             = "./modules/private-endpoints/iot-hub-dps"
-  cidr_prefix                   = local.cidr_prefix
+  cidr_prefix                        = local.cidr_prefix
   resource_uid                       = local.resource_uid
   resource_group_name                = azurerm_resource_group.rg.name
   location                           = var.location
@@ -147,7 +147,7 @@ module "private-endpoint-iot-hub-dps" {
 
 module "private-endpoint-keyvault" {
   source              = "./modules/private-endpoints/keyvault"
-  cidr_prefix                   = local.cidr_prefix
+  cidr_prefix         = local.cidr_prefix
   resource_uid        = local.resource_uid
   resource_group_name = azurerm_resource_group.rg.name
   location            = var.location

@@ -2,7 +2,7 @@ resource "azurerm_subnet" "bastion_subnet" {
   name                 = "AzureBastionSubnet"
   resource_group_name  = var.resource_group_name
   virtual_network_name = var.vnet_name
-  address_prefixes     = [cidrsubnet(var.cidr_prefix,8,2)]  
+  address_prefixes     = [cidrsubnet(var.cidr_prefix, 8, 2)]
 }
 
 resource "azurerm_network_security_group" "bastion_nsg" {

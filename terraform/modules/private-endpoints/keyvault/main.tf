@@ -2,7 +2,7 @@ resource "azurerm_subnet" "kv_subnet" {
   name                 = "snet-kv"
   resource_group_name  = var.resource_group_name
   virtual_network_name = var.vnet_name
-  address_prefixes     = [cidrsubnet(var.cidr_prefix,8,7)]
+  address_prefixes     = [cidrsubnet(var.cidr_prefix, 8, 7)]
 
   enforce_private_link_endpoint_network_policies = true
 }
@@ -35,7 +35,7 @@ resource "azurerm_private_dns_a_record" "kv_dns_a_record" {
   zone_name           = azurerm_private_dns_zone.kv_dns_zone.name
   resource_group_name = var.resource_group_name
   ttl                 = 300
-  records             = [cidrhost(azurerm_subnet.kv_subnet.address_prefixes[0],1)]
+  records             = [cidrhost(azurerm_subnet.kv_subnet.address_prefixes[0], 1)]
 }
 
 resource "azurerm_private_endpoint" "kv_private_endpoint" {

@@ -2,7 +2,7 @@ resource "azurerm_subnet" "iot_subnet" {
   name                 = "snet-iot"
   resource_group_name  = var.resource_group_name
   virtual_network_name = var.vnet_name
-  address_prefixes     = [cidrsubnet(var.cidr_prefix,8,3)]
+  address_prefixes     = [cidrsubnet(var.cidr_prefix, 8, 3)]
 
   enforce_private_link_endpoint_network_policies = true
 }
@@ -36,7 +36,7 @@ resource "azurerm_private_dns_a_record" "iothub_dns_a_record" {
   zone_name           = azurerm_private_dns_zone.iothub_dns_zone.name
   resource_group_name = var.resource_group_name
   ttl                 = 300
-  records             = [cidrhost(azurerm_subnet.iot_subnet.address_prefixes[0],1)]
+  records             = [cidrhost(azurerm_subnet.iot_subnet.address_prefixes[0], 1)]
 }
 
 resource "azurerm_private_endpoint" "iothub_private_endpoint" {
@@ -78,7 +78,7 @@ resource "azurerm_private_dns_a_record" "dps_dns_a_record" {
   zone_name           = azurerm_private_dns_zone.dps_dns_zone.name
   resource_group_name = var.resource_group_name
   ttl                 = 300
-  records             = [cidrhost(azurerm_subnet.iot_subnet.address_prefixes[0],2)]
+  records             = [cidrhost(azurerm_subnet.iot_subnet.address_prefixes[0], 2)]
 }
 
 resource "azurerm_private_endpoint" "dps_private_endpoint" {

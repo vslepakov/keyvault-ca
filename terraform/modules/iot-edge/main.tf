@@ -1,6 +1,6 @@
 locals {
   dns_label_prefix = "${var.resource_uid}-iot-edge"
-  vm_password = var.vm_password == "" ? random_string.vm_password.result : var.vm_password
+  vm_password      = var.vm_password == "" ? random_string.vm_password.result : var.vm_password
 }
 
 data "local_file" "est_auth_cert" {
@@ -68,7 +68,7 @@ resource "azurerm_subnet" "iotedge_subnet" {
   name                 = "snet-edge-device"
   resource_group_name  = var.resource_group_name
   virtual_network_name = azurerm_virtual_network.iot_edge.name
-  address_prefixes     = [cidrsubnet(var.cidr_prefix,8,1)]   
+  address_prefixes     = [cidrsubnet(var.cidr_prefix, 8, 1)]
 }
 
 resource "azurerm_network_interface" "iot_edge" {
