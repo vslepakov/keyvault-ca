@@ -1,5 +1,5 @@
 resource "azurerm_subnet" "acr_subnet" {
-  name                 = "acr-subnet"
+  name                 = "snet-acr"
   resource_group_name  = var.resource_group_name
   virtual_network_name = var.vnet_name
   address_prefixes     = ["10.0.4.0/24"]
@@ -24,7 +24,7 @@ resource "azurerm_private_dns_zone" "acr_dns_zone" {
 }
 
 resource "azurerm_private_dns_zone_virtual_network_link" "acr_dns_link" {
-  name                  = "acr_dns_link"
+  name                  = "acr-dns-link"
   resource_group_name   = var.resource_group_name
   private_dns_zone_name = azurerm_private_dns_zone.acr_dns_zone.name
   virtual_network_id    = var.vnet_id
@@ -39,20 +39,20 @@ resource "azurerm_private_dns_a_record" "acr_dns_a_record" {
 }
 
 resource "azurerm_private_endpoint" "acr_private_endpoint" {
-  name                = "priv-endpoint-acr-${var.resource_uid}"
+  name                = "pe-acr-${var.resource_uid}"
   location            = var.location
   resource_group_name = var.resource_group_name
   subnet_id           = azurerm_subnet.acr_subnet.id
 
   private_service_connection {
-    name                           = "acr_connection"
+    name                           = "acr-connection"
     private_connection_resource_id = var.acr_id
     is_manual_connection           = false
     subresource_names              = ["registry"]
   }
 
   private_dns_zone_group {
-    name                 = "dns-zone-group-acr-${var.resource_uid}"
+    name                 = "pdnsz-acr-${var.resource_uid}"
     private_dns_zone_ids = [azurerm_private_dns_zone.acr_dns_zone.id]
   }
 

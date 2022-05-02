@@ -1,5 +1,5 @@
 resource "azurerm_subnet" "kv_subnet" {
-  name                 = "kv-subnet"
+  name                 = "snet-kv"
   resource_group_name  = var.resource_group_name
   virtual_network_name = var.vnet_name
   address_prefixes     = ["10.0.7.0/24"]
@@ -24,7 +24,7 @@ resource "azurerm_private_dns_zone" "kv_dns_zone" {
 }
 
 resource "azurerm_private_dns_zone_virtual_network_link" "kv_dns_link" {
-  name                  = "kv_dns_link"
+  name                  = "kv-dns-link"
   resource_group_name   = var.resource_group_name
   private_dns_zone_name = azurerm_private_dns_zone.kv_dns_zone.name
   virtual_network_id    = var.vnet_id
@@ -39,7 +39,7 @@ resource "azurerm_private_dns_a_record" "kv_dns_a_record" {
 }
 
 resource "azurerm_private_endpoint" "kv_private_endpoint" {
-  name                = "${var.resource_uid}-kv-private-endpoint"
+  name                = "pe-kv-${var.resource_uid}"
   location            = var.location
   resource_group_name = var.resource_group_name
   subnet_id           = azurerm_subnet.kv_subnet.id
@@ -52,7 +52,7 @@ resource "azurerm_private_endpoint" "kv_private_endpoint" {
   }
 
   private_dns_zone_group {
-    name                 = "${var.resource_uid}-kv-dns-zone-group"
+    name                 = "pdnsz-kv-${var.resource_uid}"
     private_dns_zone_ids = [azurerm_private_dns_zone.kv_dns_zone.id]
   }
 

@@ -90,9 +90,7 @@ write_files:
       imagePullPolicy = "on-create"
 
       [agent.config]
-      # image = "mcr.microsoft.com/azureiotedge-agent:1.2"
       image = "${ACR_NAME}.azurecr.io/azureiotedge-agent:1.2"
-      #createOptions = { HostConfig = { ExtraHosts = ["$EVENT_HUB_NAMESPACE.servicebus.windows.net:10.99.100.133","$IOT_HUB_NAME.azure-devices.net:10.99.100.132"]} }
 
       [agent.config.auth]
       serveraddress = "${ACR_NAME}.azurecr.io"

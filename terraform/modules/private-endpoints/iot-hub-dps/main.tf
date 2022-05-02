@@ -1,5 +1,5 @@
 resource "azurerm_subnet" "iot_subnet" {
-  name                 = "iot-subnet"
+  name                 = "snet-iot"
   resource_group_name  = var.resource_group_name
   virtual_network_name = var.vnet_name
   address_prefixes     = ["10.0.3.0/24"]
@@ -25,7 +25,7 @@ resource "azurerm_private_dns_zone" "iothub_dns_zone" {
 }
 
 resource "azurerm_private_dns_zone_virtual_network_link" "iothub_dns_link" {
-  name                  = "iothub_dns_link"
+  name                  = "iothub-dns-link"
   resource_group_name   = var.resource_group_name
   private_dns_zone_name = azurerm_private_dns_zone.iothub_dns_zone.name
   virtual_network_id    = var.vnet_id
@@ -40,7 +40,7 @@ resource "azurerm_private_dns_a_record" "iothub_dns_a_record" {
 }
 
 resource "azurerm_private_endpoint" "iothub_private_endpoint" {
-  name                = "priv-endpoint-iothub-${var.resource_uid}"
+  name                = "pe-iothub-${var.resource_uid}"
   location            = var.location
   resource_group_name = var.resource_group_name
   subnet_id           = azurerm_subnet.iot_subnet.id
@@ -53,7 +53,7 @@ resource "azurerm_private_endpoint" "iothub_private_endpoint" {
   }
 
   private_dns_zone_group {
-    name                 = "iothub-dns-zone-group-${var.resource_uid}"
+    name                 = "pdnsz-iothub-${var.resource_uid}"
     private_dns_zone_ids = [azurerm_private_dns_zone.iothub_dns_zone.id]
   }
 
@@ -67,7 +67,7 @@ resource "azurerm_private_dns_zone" "dps_dns_zone" {
 }
 
 resource "azurerm_private_dns_zone_virtual_network_link" "dps_dns_link" {
-  name                  = "dps_dns_link"
+  name                  = "dps-dns-link"
   resource_group_name   = var.resource_group_name
   private_dns_zone_name = azurerm_private_dns_zone.dps_dns_zone.name
   virtual_network_id    = var.vnet_id
@@ -82,20 +82,20 @@ resource "azurerm_private_dns_a_record" "dps_dns_a_record" {
 }
 
 resource "azurerm_private_endpoint" "dps_private_endpoint" {
-  name                = "priv-endpoint-dps-${var.resource_uid}"
+  name                = "pe-dps-${var.resource_uid}"
   location            = var.location
   resource_group_name = var.resource_group_name
   subnet_id           = azurerm_subnet.iot_subnet.id
 
   private_service_connection {
-    name                           = "dps_connection"
+    name                           = "dps-connection"
     private_connection_resource_id = var.iot_dps_id
     is_manual_connection           = false
     subresource_names              = ["iotDps"]
   }
 
   private_dns_zone_group {
-    name                 = "dps-dns-zone-group${var.resource_uid}"
+    name                 = "pdnsz-dps-${var.resource_uid}"
     private_dns_zone_ids = [azurerm_private_dns_zone.dps_dns_zone.id]
   }
 

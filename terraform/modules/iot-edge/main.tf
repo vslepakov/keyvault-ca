@@ -68,7 +68,7 @@ resource "azurerm_virtual_network" "iot_edge" {
 }
 
 resource "azurerm_subnet" "iotedge_subnet" {
-  name                 = "edge-device-subnet"
+  name                 = "snet-edge-device"
   resource_group_name  = var.resource_group_name
   virtual_network_name = azurerm_virtual_network.iot_edge.name
   address_prefixes     = ["10.0.1.0/24"]
@@ -93,7 +93,7 @@ resource "azurerm_subnet_network_security_group_association" "iotedge_subnet_ass
 }
 
 resource "azurerm_linux_virtual_machine" "iot_edge" {
-  name                            = "vm-${var.edge_device_name}"
+  name                            = "vm${var.edge_device_name}"
   location                        = var.location
   resource_group_name             = var.resource_group_name
   admin_username                  = var.vm_username

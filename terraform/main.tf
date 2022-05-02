@@ -165,6 +165,6 @@ resource "null_resource" "disable_public_network" {
   depends_on = [module.acr, module.iot_hub_dps, module.keyvault, module.private-endpoint-acr, module.private-endpoint-iot-hub-dps, module.private-endpoint-keyvault]
 
   triggers = {
-    timestamp = timestamp()
+    always_run = uuid()
   }
 }

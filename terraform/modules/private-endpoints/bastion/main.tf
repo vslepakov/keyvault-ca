@@ -65,7 +65,7 @@ resource "azurerm_subnet_network_security_group_association" "bastion_subnet_ass
 }
 
 resource "azurerm_public_ip" "public_ip" {
-  name                = "bastion-ip-${var.resource_uid}"
+  name                = "pip-bastion-${var.resource_uid}"
   location            = var.location
   resource_group_name = var.resource_group_name
   allocation_method   = "Static"
@@ -73,7 +73,7 @@ resource "azurerm_public_ip" "public_ip" {
 }
 
 resource "azurerm_bastion_host" "bastion" {
-  name                = "bastion-host-${var.resource_uid}"
+  name                = "host-bastion-${var.resource_uid}"
   location            = var.location
   resource_group_name = var.resource_group_name
 

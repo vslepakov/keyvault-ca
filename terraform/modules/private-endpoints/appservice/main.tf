@@ -1,5 +1,5 @@
 resource "azurerm_subnet" "app_subnet" {
-  name                 = "app-subnet"
+  name                 = "snet-app"
   resource_group_name  = var.resource_group_name
   virtual_network_name = var.vnet_name
   address_prefixes     = ["10.0.5.0/24"]
@@ -19,7 +19,7 @@ resource "azurerm_subnet_network_security_group_association" "app_subnet_assoc" 
 }
 
 resource "azurerm_subnet" "app_vnet_integration_subnet" {
-  name                 = "app-vnet-integration-subnet"
+  name                 = "snet-app-vnet-integration"
   resource_group_name  = var.resource_group_name
   virtual_network_name = var.vnet_name
   address_prefixes     = ["10.0.6.0/24"]
@@ -40,7 +40,7 @@ resource "azurerm_private_dns_zone" "app_dns_zone" {
 }
 
 resource "azurerm_private_dns_zone_virtual_network_link" "app_dns_link" {
-  name                  = "app_dns_link"
+  name                  = "app-dns-link"
   resource_group_name   = var.resource_group_name
   private_dns_zone_name = azurerm_private_dns_zone.app_dns_zone.name
   virtual_network_id    = var.vnet_id
@@ -55,20 +55,20 @@ resource "azurerm_private_dns_a_record" "app_dns_a_record" {
 }
 
 resource "azurerm_private_endpoint" "app_private_endpoint" {
-  name                = "priv-endpoint-app-${var.resource_uid}"
+  name                = "pe-app-${var.resource_uid}"
   location            = var.location
   resource_group_name = var.resource_group_name
   subnet_id           = azurerm_subnet.app_subnet.id
 
   private_service_connection {
-    name                           = "app_connection"
+    name                           = "app-connection"
     private_connection_resource_id = var.app_id
     is_manual_connection           = false
     subresource_names              = ["sites"]
   }
 
   private_dns_zone_group {
-    name                 = "app-dns-zone-group-${var.resource_uid}"
+    name                 = "pdnsz-${var.resource_uid}"
     private_dns_zone_ids = [azurerm_private_dns_zone.app_dns_zone.id]
   }
 
