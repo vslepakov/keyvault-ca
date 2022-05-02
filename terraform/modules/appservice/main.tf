@@ -26,7 +26,7 @@ resource "azurerm_service_plan" "appserviceplan" {
 }
 
 resource "azurerm_linux_web_app" "appservice" {
-  name                       = "ase-${var.resource_uid}"
+  name                       = "app-${var.resource_uid}"
   location                   = var.location
   resource_group_name        = var.resource_group_name
   service_plan_id            = azurerm_service_plan.appserviceplan.id
