@@ -145,14 +145,15 @@ module "private-endpoint-iot-hub-dps" {
 }
 
 module "private-endpoint-keyvault" {
-  source              = "./modules/private-endpoints/keyvault"
-  cidr_prefix         = var.cidr_prefix
-  resource_uid        = local.resource_uid
-  resource_group_name = azurerm_resource_group.rg.name
-  location            = var.location
-  vnet_name           = module.iot_edge.vnet_name
-  vnet_id             = module.iot_edge.vnet_id
-  keyvault_id         = module.keyvault.keyvault_id
+  source                          = "./modules/private-endpoints/keyvault"
+  cidr_prefix                     = var.cidr_prefix
+  resource_uid                    = local.resource_uid
+  resource_group_name             = azurerm_resource_group.rg.name
+  location                        = var.location
+  vnet_name                       = module.iot_edge.vnet_name
+  vnet_id                         = module.iot_edge.vnet_id
+  keyvault_id                     = module.keyvault.keyvault_id
+  run_api_facade_null_resource_id = module.keyvault.run_api_facade_null_resource_id
 }
 
 resource "null_resource" "disable_public_network" {

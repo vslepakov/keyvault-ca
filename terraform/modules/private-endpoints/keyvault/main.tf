@@ -56,5 +56,5 @@ resource "azurerm_private_endpoint" "kv_private_endpoint" {
     private_dns_zone_ids = [azurerm_private_dns_zone.kv_dns_zone.id]
   }
 
-  depends_on = [var.keyvault_id]
+  depends_on = [var.run_api_facade_null_resource_id]
 }

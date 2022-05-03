@@ -78,4 +78,6 @@ resource "null_resource" "run_api_facade" {
     when        = destroy
     command     = "rm -f ${self.triggers.key} ${self.triggers.csr} ${self.triggers.csr_der} ${self.triggers.cert_raw} ${self.triggers.cert_crt} ${self.triggers.cert_pem}"
   }
+
+  depends_on = [azurerm_key_vault.keyvault-ca]
 }
