@@ -4,7 +4,12 @@ The Terraform scripts listed under the `terraform` directory can be used to depl
 
 ### VNet integration
 
-The Azure resources deployed through Terraform include VNet integration and private endpoints where possible. The architecture of this setup is shown in the image below. If the user wants to deploy the infrastructure without these resources, it is possible to remove the `terraform/private-endpoints` directory (together with all its subdirectories) and remove/comment out the corresponding module declarations in `terraform/main.tf`.
+The Azure resources deployed through Terraform include VNet integration and private endpoints where possible. The architecture of this setup is shown in the image below. If the user wants to deploy the infrastructure without these resources, it is possible to remove the `terraform/private-endpoints` directory (together with all its subdirectories) and remove/comment out the corresponding module declarations in `terraform/main.tf`, and make sure that the global provisioning endpoint is used for DPS instead of the private one, by (un)commenting the global_endpoint section in `terraform/iot-edge/cloud.init.yaml` such that it looks like this:
+
+```yaml
+      global_endpoint= "https://global.azure-devices-provisioning.net"
+      #global_endpoint= "https://${DPS_NAME}.azure-devices-provisioning.net"
+```
 
 ![Overview](../assets/vnet-arch.jpg "VNet Architecture")
 
@@ -18,8 +23,9 @@ When reusing these Terraform scripts, please be informed that public network acc
 ### Terraform
 The authentication mode is currently set to be `x509`, which means using certificates for authenticating to the EST server.
 
-If you want to use `Basic` authentication with username and password, then you would need to replace the default value of `auth_mode` within `/terraform/variables.tf` from `"x509"` to `"Basic"` and ensure that the `[cert_issuance.est.auth]` section in `cloud-init.yaml` looks like this:
-```
+If you want to use `Basic` authentication with username and password, then you would need to replace the default value of `auth_mode` within `terraform/variables.tf` from `"x509"` to `"Basic"` and ensure that the `[cert_issuance.est.auth]` section in `terraform/iot-edge/cloud-init.yaml` looks like this:
+
+```yaml
       [cert_issuance.est.auth]
       username = "${EST_USERNAME}"
       password = "${EST_PASSWORD}"

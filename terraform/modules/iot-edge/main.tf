@@ -38,7 +38,7 @@ resource "azurerm_network_security_group" "iot_edge" {
     access                     = "Allow"
     direction                  = "Inbound"
     protocol                   = "*"
-    source_address_prefix      = "10.0.2.0/26"
+    source_address_prefix      = cidrsubnet(var.cidr_prefix, 8, 2)
     source_port_range          = "*"
     destination_address_prefix = "*"
     destination_port_ranges    = ["3389", "22"]

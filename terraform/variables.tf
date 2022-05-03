@@ -3,6 +3,11 @@ variable "location" {
   default = "westeurope"
 }
 
+variable "cidr_prefix" {
+  type    = string
+  default = "10.0.0.0/16"
+}
+
 variable "resource_uid" {
   type    = string
   default = ""
