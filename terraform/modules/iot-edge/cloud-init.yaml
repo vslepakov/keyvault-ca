@@ -51,7 +51,8 @@ write_files:
 
       [provisioning]
       source = "dps"
-      global_endpoint= "https://global.azure-devices-provisioning.net"
+      #global_endpoint= "https://global.azure-devices-provisioning.net"
+      global_endpoint= "https://${DPS_NAME}.azure-devices-provisioning.net"
       id_scope= "${SCOPE_ID}"
 
       [provisioning.attestation]
@@ -89,7 +90,12 @@ write_files:
       imagePullPolicy = "on-create"
 
       [agent.config]
-      image = "mcr.microsoft.com/azureiotedge-agent:1.2"
+      image = "${ACR_NAME}.azurecr.io/azureiotedge-agent:1.2"
+
+      [agent.config.auth]
+      serveraddress = "${ACR_NAME}.azurecr.io"
+      username = "${ACR_USERNAME}"
+      password = "${ACR_PASSWORD}"
       
       # ==============================================================================
       # Edge CA certificate issued over EST:

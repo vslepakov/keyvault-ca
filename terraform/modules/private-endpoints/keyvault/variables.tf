@@ -2,27 +2,27 @@ variable "resource_group_name" {
   type = string
 }
 
+variable "cidr_prefix" {
+  type = string
+}
+
 variable "location" {
   type = string
 }
 
-variable "resource_prefix" {
-  type = string
-}
-
-variable "edge_device_name" {
-  type = string
-}
-
-variable "issuing_ca" {
-  type = string
-}
-
-variable "keyvault_name" {
+variable "resource_uid" {
   type = string
 }
 
 variable "vnet_name" {
+  type = string
+}
+
+variable "vnet_id" {
+  type = string
+}
+
+variable "keyvault_id" {
   type = string
 }
 

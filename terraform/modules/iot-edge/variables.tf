@@ -1,8 +1,12 @@
-variable "resource_prefix" {
+variable "resource_uid" {
   type = string
 }
 
 variable "resource_group_name" {
+  type = string
+}
+
+variable "cidr_prefix" {
   type = string
 }
 
@@ -41,6 +45,22 @@ variable "est_username" {
 }
 
 variable "est_password" {
+  type = string
+}
+
+variable "iot_dps_name" {
+  type = string
+}
+
+variable "acr_admin_password" {
+  type = string
+}
+
+variable "acr_admin_username" {
+  type = string
+}
+
+variable "acr_name" {
   type = string
 }
 

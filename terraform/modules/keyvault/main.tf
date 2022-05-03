@@ -1,11 +1,11 @@
 data "azurerm_client_config" "current" {}
 
 locals {
-  certs_path = "${path.root}/../Certs/${var.resource_prefix}"
+  certs_path = "${path.root}/../Certs/${var.resource_uid}"
 }
 
 resource "azurerm_key_vault" "keyvault-ca" {
-  name                        = "kv-${var.resource_prefix}"
+  name                        = "kv-${var.resource_uid}"
   location                    = var.location
   resource_group_name         = var.resource_group_name
   enabled_for_disk_encryption = true
@@ -13,6 +13,16 @@ resource "azurerm_key_vault" "keyvault-ca" {
   purge_protection_enabled    = false
   soft_delete_retention_days  = 7
   sku_name                    = "standard"
+}
+
+resource "azurerm_key_vault_access_policy" "app_accesspolicy" {
+  key_vault_id = azurerm_key_vault.keyvault-ca.id
+  tenant_id    = data.azurerm_client_config.current.tenant_id
+  object_id    = var.app_princ_id
+
+  key_permissions = ["Sign"]
+
+  certificate_permissions = ["Get", "List", "Update", "Create"]
 }
 
 resource "azurerm_key_vault_access_policy" "user_accesspolicy" {
@@ -64,8 +74,10 @@ resource "null_resource" "run_api_facade" {
 
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
-    working_dir = "${path.root}/../KeyvaultCA"
+    working_dir = "${path.root}/../Certs"
     when        = destroy
     command     = "rm -f ${self.triggers.key} ${self.triggers.csr} ${self.triggers.csr_der} ${self.triggers.cert_raw} ${self.triggers.cert_crt} ${self.triggers.cert_pem}"
   }
+
+  depends_on = [azurerm_key_vault.keyvault-ca]
 }

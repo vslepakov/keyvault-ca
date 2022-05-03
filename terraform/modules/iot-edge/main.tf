@@ -1,18 +1,15 @@
 locals {
-  dns_label_prefix = "${var.resource_prefix}-iot-edge"
-}
-
-locals {
-  vm_password = var.vm_password == "" ? random_string.vm_password.result : var.vm_password
+  dns_label_prefix = "${var.resource_uid}-iot-edge"
+  vm_password      = var.vm_password == "" ? random_string.vm_password.result : var.vm_password
 }
 
 data "local_file" "est_auth_cert" {
-  filename   = "${path.root}/../Certs/${var.resource_prefix}-cert.pem"
+  filename   = "${path.root}/../Certs/${var.resource_uid}-cert.pem"
   depends_on = [var.run_api_facade_null_resource_id]
 }
 
 data "local_file" "est_auth_key" {
-  filename   = "${path.root}/../Certs/${var.resource_prefix}.key.pem"
+  filename   = "${path.root}/../Certs/${var.resource_uid}.key.pem"
   depends_on = [var.run_api_facade_null_resource_id]
 }
 
@@ -31,14 +28,26 @@ resource "azurerm_public_ip" "iot_edge" {
 }
 
 resource "azurerm_network_security_group" "iot_edge" {
-  name                = "nsg-${local.dns_label_prefix}"
+  name                = "nsg-iotedge-${var.resource_uid}"
   resource_group_name = var.resource_group_name
   location            = var.location
 
   security_rule {
-    name                       = "nsgr-allow-22"
-    priority                   = 1000
+    name                       = "nsgsr-AllowBastionInbound"
+    priority                   = 900
     access                     = "Allow"
+    direction                  = "Inbound"
+    protocol                   = "*"
+    source_address_prefix      = cidrsubnet(var.cidr_prefix, 8, 2)
+    source_port_range          = "*"
+    destination_address_prefix = "*"
+    destination_port_ranges    = ["3389", "22"]
+  }
+
+  security_rule {
+    name                       = "nsgsr-Default-Deny-22"
+    priority                   = 1000
+    access                     = "Deny"
     direction                  = "Inbound"
     protocol                   = "Tcp"
     destination_port_range     = "22"
@@ -49,16 +58,17 @@ resource "azurerm_network_security_group" "iot_edge" {
 }
 
 resource "azurerm_virtual_network" "iot_edge" {
-  name                = "vnet-${local.dns_label_prefix}"
+  name                = "vnet-${var.resource_uid}"
   location            = var.location
   resource_group_name = var.resource_group_name
-  address_space       = ["10.0.0.0/16"]
+  address_space       = [var.cidr_prefix]
+}
 
-  subnet {
-    name           = "snet-${local.dns_label_prefix}"
-    address_prefix = "10.0.1.0/24"
-    security_group = azurerm_network_security_group.iot_edge.id
-  }
+resource "azurerm_subnet" "iotedge_subnet" {
+  name                 = "snet-edge-device"
+  resource_group_name  = var.resource_group_name
+  virtual_network_name = azurerm_virtual_network.iot_edge.name
+  address_prefixes     = [cidrsubnet(var.cidr_prefix, 8, 1)]
 }
 
 resource "azurerm_network_interface" "iot_edge" {
@@ -70,8 +80,13 @@ resource "azurerm_network_interface" "iot_edge" {
     name                          = "ipconf-${local.dns_label_prefix}"
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id          = azurerm_public_ip.iot_edge.id
-    subnet_id                     = azurerm_virtual_network.iot_edge.subnet.*.id[0]
+    subnet_id                     = azurerm_subnet.iotedge_subnet.id
   }
+}
+
+resource "azurerm_subnet_network_security_group_association" "iotedge_subnet_assoc" {
+  subnet_id                 = azurerm_subnet.iotedge_subnet.id
+  network_security_group_id = azurerm_network_security_group.iot_edge.id
 }
 
 resource "azurerm_linux_virtual_machine" "iot_edge" {
@@ -94,7 +109,10 @@ resource "azurerm_linux_virtual_machine" "iot_edge" {
     "EST_USERNAME"     = var.est_username
     "EST_PASSWORD"     = var.est_password
     "VM_USER_NAME"     = var.vm_username
-    "RESOURCE_PREFIX"  = var.resource_prefix
+    "DPS_NAME"         = var.iot_dps_name
+    "ACR_USERNAME"     = var.acr_admin_username
+    "ACR_PASSWORD"     = var.acr_admin_password
+    "ACR_NAME"         = var.acr_name
     "AUTH_CERTIFICATE" = var.auth_mode == "x509" ? indent(6, data.local_file.est_auth_cert.content) : ""
     "AUTH_KEY"         = var.auth_mode == "x509" ? indent(6, data.local_file.est_auth_key.content) : ""
   }))

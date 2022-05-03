@@ -10,10 +10,18 @@ variable "resource_uid" {
   type = string
 }
 
-variable "app_princ_id" {
+variable "edge_device_name" {
   type = string
 }
 
 variable "issuing_ca" {
+  type = string
+}
+
+variable "keyvault_name" {
+  type = string
+}
+
+variable "run_api_facade_null_resource_id" {
   type = string
 }

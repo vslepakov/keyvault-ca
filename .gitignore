@@ -386,3 +386,4 @@ override.tf.json
 
 # certs
 Certs/*
+KeyVaultCA.Web/TrustedCAs/ContosoRootCA.cer

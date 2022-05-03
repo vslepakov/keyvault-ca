@@ -11,14 +11,14 @@ locals {
 }
 
 resource "azurerm_application_insights" "appinsights" {
-  name                = "appi-${var.resource_prefix}"
+  name                = "appi-${var.resource_uid}"
   location            = var.location
   resource_group_name = var.resource_group_name
   application_type    = "web"
 }
 
 resource "azurerm_service_plan" "appserviceplan" {
-  name                = "plan-${var.resource_prefix}"
+  name                = "plan-${var.resource_uid}"
   location            = var.location
   resource_group_name = var.resource_group_name
   os_type             = "Linux"
@@ -26,7 +26,7 @@ resource "azurerm_service_plan" "appserviceplan" {
 }
 
 resource "azurerm_linux_web_app" "appservice" {
-  name                       = "app-${var.resource_prefix}"
+  name                       = "app-${var.resource_uid}"
   location                   = var.location
   resource_group_name        = var.resource_group_name
   service_plan_id            = azurerm_service_plan.appserviceplan.id
@@ -57,21 +57,6 @@ resource "azurerm_linux_web_app" "appservice" {
     "APPINSIGHTS_INSTRUMENTATIONKEY"             = azurerm_application_insights.appinsights.instrumentation_key
     "ApplicationInsights__ConnectionString"      = azurerm_application_insights.appinsights.connection_string
     "ApplicationInsightsAgent_EXTENSION_VERSION" = "~2"
+    "WEBSITE_PULL_IMAGE_OVER_VNET"               = true
   }
-}
-
-resource "azurerm_role_assignment" "app_acr" {
-  scope                = var.acr_id
-  role_definition_name = "AcrPull"
-  principal_id         = azurerm_linux_web_app.appservice.identity.0.principal_id
-}
-
-resource "azurerm_key_vault_access_policy" "app_accesspolicy" {
-  key_vault_id = var.keyvault_id
-  tenant_id    = data.azurerm_client_config.current.tenant_id
-  object_id    = azurerm_linux_web_app.appservice.identity.0.principal_id
-
-  key_permissions = ["Sign"]
-
-  certificate_permissions = ["Get", "List", "Update", "Create"]
 }

@@ -6,7 +6,11 @@ variable "location" {
   type = string
 }
 
-variable "resource_prefix" {
+variable "resource_uid" {
+  type = string
+}
+
+variable "app_princ_id" {
   type = string
 }
 
