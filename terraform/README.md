@@ -13,7 +13,7 @@ Each private endpoint is located inside 'their own' subnet to ensure the ability
 ### Disabling public network access
 When reusing these Terraform scripts, please be informed that public network access for ACR, Device Provisioning Service and Key Vault is enabled while running the scripts. This is necessary to configure the resources properly (i.e. downloading the certificate from Key Vault and then uploading to DPS) from the (local) machine where the scripts are executed. Public network access is then disabled for each service using Azure CLI commands as the last step of the deployment.
 
-## Deploying without VNet integration
+### Deploying without VNet integration
 If the user wants to deploy the infrastructure without using private endpoints, this can be done by removing the `terraform/private-endpoints` directory (together with all its subdirectories) and remove/comment out the corresponding module declarations in `terraform/main.tf`. Also, make sure that the global provisioning endpoint is used for DPS instead of the private one, by (un)commenting the global_endpoint section in `terraform/iot-edge/cloud-init.yaml` such that it looks like this:
 
 ```yaml
@@ -21,9 +21,7 @@ If the user wants to deploy the infrastructure without using private endpoints, 
       #global_endpoint= "https://${DPS_NAME}.azure-devices-provisioning.net"
 ```
 
-## Authenticating to the EST server using certificates
-
-### Terraform
+### Authenticating to the EST server using certificates
 The authentication mode is currently set to be `x509`, which means using certificates for authenticating to the EST server.
 
 If you want to use `Basic` authentication with username and password, then you would need to replace the default value of `auth_mode` within `terraform/variables.tf` from `"x509"` to `"Basic"` and ensure that the `[cert_issuance.est.auth]` section in `terraform/iot-edge/cloud-init.yaml` looks like this:
