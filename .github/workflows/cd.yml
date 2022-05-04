@@ -1,0 +1,50 @@
+name: CD
+on: 
+  workflow_dispatch:
+
+jobs:
+  terraform:
+    name: 'Setup Azure Infrastructure'
+    runs-on: ubuntu-latest
+    env:
+      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+
+    defaults:
+      run:
+        working-directory: ./terraform
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          # This wrapper must be disabled in order to correctly capture output from terraform CLI into a bash var
+          # See https://github.com/hashicorp/setup-terraform/issues/20
+          terraform_wrapper: false
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
+
+  e2etest:
+    name: 'Run E2E Test'
+    runs-on: ubuntu-latest
+    needs: terraform
+    env:       
+     ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+
+    defaults:
+      run:
+        working-directory: ./DeviceProvisioningE2ETest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Run E2E Test
+        run: dotenv -e IotHubConnectionString={$1} -- dotnet test /DeviceProvisioningE2ETest/
