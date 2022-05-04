@@ -19,8 +19,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Set directory ownership
-        run: sudo chown -R user /home/runner/.azure
+      - name: Set sudo to ensure directory permissions
+        run: sudo -s
 
       - name: Azure Login
         uses: azure/CLI@v1
