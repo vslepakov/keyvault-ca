@@ -43,17 +43,23 @@ jobs:
           IotHubConnectionString=$(terraform output iot_hub_connectionstring)
           EdgeDeviceName=$(terraform output edge_device_name)
           IotHubName=$(terraform output iot_hub_name)
-          ResourceGroupName=$(terraform output resource_group_name)
 
           echo $IotHubConnectionString
           echo $EdgeDeviceName
           echo $IotHubName
-          echo $ResourceGroupName
+    outputs:
+      IotHubConnectionString: ${{ steps.terraform.outputs.IotHubConnectionString}}
+      EdgeDeviceName: ${{ steps.terraform.outputs.EdgeDeviceName}}
+      IotHubName: ${{ steps.terraform.outputs.IotHubName}}
 
   e2etest:
     name: 'Run E2E Test'
     runs-on: ubuntu-latest
     needs: terraform
+    env:
+      IotHubConnectionString: ${{ needs.terraform.outputs.IotHubConnectionString}}
+      EdgeDeviceName: ${{ needs.terraform.outputs.EdgeDeviceName}}
+      IotHubName: ${{ needs.terraform.outputs.IotHubName}}
 
     defaults:
       run:
