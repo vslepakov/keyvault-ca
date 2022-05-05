@@ -48,9 +48,9 @@ jobs:
           echo $EdgeDeviceName
           echo $IotHubName
     outputs:
-      IotHubConnectionString: ${{ steps.terraform.outputs.IotHubConnectionString}}
-      EdgeDeviceName: ${{ steps.terraform.outputs.EdgeDeviceName}}
-      IotHubName: ${{ steps.terraform.outputs.IotHubName}}
+      IotHubConnectionString: $IotHubConnectionString
+      EdgeDeviceName: $EdgeDeviceName
+      IotHubName: $IotHubName
 
   e2etest:
     name: 'Run E2E Test'
@@ -68,6 +68,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Echo variables
+        run: |
+          echo $IotHubConnectionString
+          echo $EdgeDeviceName
+          echo $IotHubName
+          
       - name: Enable public network access
         run: az iot hub update --name $IotHubName --set properties.publicNetworkAccess=Enabled
 
