@@ -26,10 +26,7 @@ resource "null_resource" "push-docker" {
 
 resource "null_resource" "push-iotedge" {
   provisioner "local-exec" {
-    command = <<EOF
-    az login
-    az acr import --name ${azurerm_container_registry.acr.name} --source mcr.microsoft.com/azureiotedge-agent:1.2 --image azureiotedge-agent:1.2
-    EOF
+    command = "az acr import --name ${azurerm_container_registry.acr.name} --source mcr.microsoft.com/azureiotedge-agent:1.2 --image azureiotedge-agent:1.2"
   }
 
   depends_on = [azurerm_container_registry.acr]

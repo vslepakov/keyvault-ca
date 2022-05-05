@@ -19,14 +19,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      # - name: Set sudo to ensure directory permissions
-      #   run: sudo -s
-
-      # - name: Azure Login
-      #   uses: azure/CLI@v1
-      #   with:
-      #    inlineScript: |
-      #     az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZURE_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}
+      - name: Set sudo to ensure directory permissions
+        run: sudo -s
+        
+      - name: Azure Login
+        run: az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZURE_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }} 
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
