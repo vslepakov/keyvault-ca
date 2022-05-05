@@ -42,6 +42,8 @@ jobs:
         run: |
           IotHubConnectionString=$(terraform output iot_hub_connectionstring)
           EdgeDeviceName=$(terraform output edge_device_name)
+          echo $IotHubConnectionString
+          echo #EdgeDeviceName
 
   e2etest:
     name: 'Run E2E Test'
@@ -59,4 +61,4 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Run E2E Test
-        run: dotenv -e $IotHubConnectionString={$1} $EdgeDeviceName={$2} -- dotnet test /DeviceProvisioningE2ETest/
+        run: dotenv -v IotHubConnectionString=$IotHubConnectionString -v EdgeDeviceName=$EdgeDeviceName -- dotnet test /DeviceProvisioningE2ETest/
