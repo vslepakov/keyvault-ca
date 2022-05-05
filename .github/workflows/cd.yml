@@ -63,10 +63,10 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Enable public network access
-        run: az iot hub update --name $IotHubName --resource-group $ResourceGroupName --set properties.publicNetworkAccess=Enabled
+        run: az iot hub update --name $IotHubName --set properties.publicNetworkAccess=Enabled
 
       - name: Run E2E Test
         run: dotenv -v IotHubConnectionString=$IotHubConnectionString -v EdgeDeviceName=$EdgeDeviceName -- dotnet test /DeviceProvisioningE2ETest/
 
       - name: Disable public network access
-        run: az iot hub update --name $IotHubName --resource-group $ResourceGroupName --set properties.publicNetworkAccess=Disabled
+        run: az iot hub update --name $IotHubName --set properties.publicNetworkAccess=Disabled
