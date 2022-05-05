@@ -58,6 +58,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: terraform
     env:
+      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       IotHubConnectionString: ${{ needs.terraform.outputs.IotHubConnectionString}}
       EdgeDeviceName: ${{ needs.terraform.outputs.EdgeDeviceName}}
       IotHubName: ${{ needs.terraform.outputs.IotHubName}}
@@ -75,11 +79,11 @@ jobs:
           echo $EdgeDeviceName
           echo $IotHubName
 
-      - name: Add Azure CLI IoT Extension
-        run: az extension add --name azure-iot
-
       - name: Enable public network access
-        run: az iot hub update --name $IotHubName --set properties.publicNetworkAccess=Enabled
+        run: |
+          az login --service-principal -u $ARM_CLIENT_ID -p $ARM_CLIENT_SECRET --tenant $ARM_TENANT_ID
+          az extension add --name azure-iot
+          az iot hub update --name $IotHubName --set properties.publicNetworkAccess=Enabled
 
       - name: Run E2E Test
         run: dotenv -v IotHubConnectionString=$IotHubConnectionString -v EdgeDeviceName=$EdgeDeviceName -- dotnet test /DeviceProvisioningE2ETest/
