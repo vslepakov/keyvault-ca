@@ -40,8 +40,8 @@ jobs:
 
       - name: Terraform Output
         run: |
-        IotHubConnectionString=$(terraform output iot_hub_connectionstring)
-        EdgeDeviceName=$(terraform output edge_device_name)
+          IotHubConnectionString=$(terraform output iot_hub_connectionstring)
+          EdgeDeviceName=$(terraform output edge_device_name)
 
   e2etest:
     name: 'Run E2E Test'
