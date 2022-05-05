@@ -21,3 +21,11 @@ output "iot_hub_connectionstring" {
 output "edge_device_name" {
   value = local.edge_device_name
 }
+
+output "iot_hub_name" {
+  value = module.iot_hub_dps.iot_hub_name
+}
+
+output "resource_group_name" {
+  value = azurerm_resource_group.rg.name
+}

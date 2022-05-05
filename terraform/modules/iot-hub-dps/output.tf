@@ -22,6 +22,10 @@ output "dps_shared_access_policy_id" {
   value = azurerm_iothub_shared_access_policy.iot_hub_dps_shared_access_policy.id
 }
 
+output "iot_hub_name" {
+  value = azurerm_iothub.iothub.name
+}
+
 output "iot_hub_host_name" {
   value = azurerm_iothub.iothub.hostname
 }
