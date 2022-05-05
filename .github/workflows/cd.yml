@@ -38,19 +38,20 @@ jobs:
       - name: Terraform Apply
         run: terraform apply -auto-approve
 
-      - name: Terraform Output
+      - id: tfoutput
+        name: Terraform Output
         run: |
           IotHubConnectionString=$(terraform output iot_hub_connectionstring)
           EdgeDeviceName=$(terraform output edge_device_name)
           IotHubName=$(terraform output iot_hub_name)
 
-          echo $IotHubConnectionString
-          echo $EdgeDeviceName
-          echo $IotHubName
+          echo "::set-output name=IotHubConnectionString::$IotHubConnectionString"
+          echo "::set-output name=EdgeDeviceName::$EdgeDeviceName"
+          echo "::set-output name=IotHubName::$IotHubName"
     outputs:
-      IotHubConnectionString: $IotHubConnectionString
-      EdgeDeviceName: $EdgeDeviceName
-      IotHubName: $IotHubName
+      IotHubConnectionString: ${{ steps.tfoutput.outputs.IotHubConnectionString }}
+      EdgeDeviceName: ${{ steps.tfoutput.outputs.EdgeDeviceName }}
+      IotHubName: ${{ steps.tfoutput.outputs.IotHubName }}
 
   e2etest:
     name: 'Run E2E Test'
@@ -73,7 +74,10 @@ jobs:
           echo $IotHubConnectionString
           echo $EdgeDeviceName
           echo $IotHubName
-          
+
+      - name: Add Azure CLI IoT Extension
+        run: az extension add --name azure-iot
+
       - name: Enable public network access
         run: az iot hub update --name $IotHubName --set properties.publicNetworkAccess=Enabled
 
