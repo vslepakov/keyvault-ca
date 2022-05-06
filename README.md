@@ -91,7 +91,7 @@ Provide the following variables in the `appsettings.json` of the `KeyVaultCA.Web
   
 1. ```KeyVaultUrl``` - url of your KeyVault the format depending on whether it is accessible via public or private endpoint:
     - for a public endpoint, the format is `https://<KEYVAULT_NAME>.vault.azure.net/`
-    - for a private endpoint with Azure built-in DNS integration, the format is `https://<KEYVAULT_NAME>.privatelink.vaultcore.azure.net/`
+    - for a private endpoint with Azure built-in DNS integration, the format can be either the public url or `https://<KEYVAULT_NAME>.privatelink.vaultcore.azure.net/`
     - for a private endpoint with custom DNS integration, the format is `https://<KEYVAULT_NAME>.vaultcore.azure.net/`
 2. ```IssuingCA``` - name of the certificate in the KeyVault to issue your leaf certificate.  
 3. ```CertValidityInDays``` - specifies validity period for issued certificates (maximum is 365 days).  

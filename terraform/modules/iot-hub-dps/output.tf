@@ -35,5 +35,6 @@ output "iot_hub_key_name" {
 }
 
 output "iot_hub_primary_key" {
-  value = azurerm_iothub.iothub.shared_access_policy.0.primary_key
+  value     = azurerm_iothub.iothub.shared_access_policy.0.primary_key
+  sensitive = true
 }
