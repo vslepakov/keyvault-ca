@@ -10,8 +10,8 @@
             "request": "launch",
             "preLaunchTask": "build",
             "program": "${workspaceFolder}/KeyVaultCA/bin/Debug/net6.0/KeyVaultCA.dll",
-            "args": [],
-            "cwd": "${workspaceFolder}",
+            "args": ["${workspaceFolder}/appsettings.json"],
+            "cwd": "${workspaceFolder}/KeyVaultCA",
             "console": "internalConsole",
             "stopAtEntry": false
         },
@@ -21,8 +21,8 @@
             "request": "launch",
             "preLaunchTask": "build",
             "program": "${workspaceFolder}/KeyVaultCA.Web/bin/Debug/net6.0/KeyVaultCA.Web.dll",
-            "args": [],
-            "cwd": "${workspaceFolder}",
+            "args": ["${workspaceFolder}/appsettings.json"],
+            "cwd": "${workspaceFolder}/KeyVaultCA.Web",
             "console": "internalConsole",
             "stopAtEntry": false
         },
@@ -32,8 +32,8 @@
             "request": "launch",
             "preLaunchTask": "build",
             "program": "${workspaceFolder}/DeviceProvisioningE2ETest/bin/Debug/net6.0/E2ETests.dll",
-            "args": [],
-            "cwd": "${workspaceFolder}",
+            "args": ["${workspaceFolder}/appsettings.json"],
+            "cwd": "${workspaceFolder}/DeviceProvisioningE2ETest",
             "console": "internalConsole",
             "stopAtEntry": false
         },

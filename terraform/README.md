@@ -20,7 +20,7 @@ If the user wants to deploy the infrastructure without using private endpoints, 
       global_endpoint= "https://global.azure-devices-provisioning.net"
       #global_endpoint= "https://${DPS_NAME}.azure-devices-provisioning.net"
 ```
-And finally, set the `public_network_access_enabled` flag as part of the IoT Hub resource creation, inside `terraform/modules/iot-hub-dps/main.tf`, to `true` instead of `false`. 
+And finally, set the `public_network_access_enabled` flag as part of the IoT Hub resource creation, inside `terraform/modules/iot-hub-dps/main.tf`, to `true` instead of `false`. If there is a need to SSH into the Virtual Machine, you could enable just-in-time access or open Port 22 as it is closed per default in this setup.
 
 ### Authenticating to the EST server using certificates
 The authentication mode is currently set to be `x509`, which means using certificates for authenticating to the EST server.
