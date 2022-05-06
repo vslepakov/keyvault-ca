@@ -86,7 +86,7 @@ jobs:
           az iot hub update --name $IotHubName --set properties.publicNetworkAccess=Enabled
 
       - name: Run E2E Test
-        run: dotenv -v IotHubConnectionString=$IotHubConnectionString -v EdgeDeviceName=$EdgeDeviceName -- dotnet test /DeviceProvisioningE2ETest/
+        run: dotnet test -e IotHubConnectionString=$IotHubConnectionString -e EdgeDeviceName=$EdgeDeviceName
 
       - name: Disable public network access
         run: az iot hub update --name $IotHubName --set properties.publicNetworkAccess=Disabled
