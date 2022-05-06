@@ -79,7 +79,7 @@ jobs:
           echo $EdgeDeviceName
           echo $IotHubName
 
-      - name: Enable public network access
+      - name: Enable public network access for IoT Hub
         run: |
           az login --service-principal -u $ARM_CLIENT_ID -p $ARM_CLIENT_SECRET --tenant $ARM_TENANT_ID
           az extension add --name azure-iot
@@ -88,5 +88,5 @@ jobs:
       - name: Run E2E Test
         run: dotnet test -e IotHubConnectionString=$IotHubConnectionString -e EdgeDeviceName=$EdgeDeviceName
 
-      - name: Disable public network access
+      - name: Disable public network access for IoT Hub
         run: az iot hub update --name $IotHubName --set properties.publicNetworkAccess=Disabled

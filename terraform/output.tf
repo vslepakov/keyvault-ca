@@ -15,7 +15,8 @@ output "est_password" {
 }
 
 output "iot_hub_connectionstring" {
-  value = join(";", ["HostName=${module.iot_hub_dps.iot_hub_host_name}", "SharedAccessKeyName=${module.iot_hub_dps.iot_hub_key_name}", "SharedAccessKey=${module.iot_hub_dps.iot_hub_primary_key}"])
+  value     = join(";", ["HostName=${module.iot_hub_dps.iot_hub_host_name}", "SharedAccessKeyName=${module.iot_hub_dps.iot_hub_key_name}", "SharedAccessKey=${module.iot_hub_dps.iot_hub_primary_key}"])
+  sensitive = true
 }
 
 output "edge_device_name" {
