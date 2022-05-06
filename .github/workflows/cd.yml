@@ -41,7 +41,7 @@ jobs:
       - id: tfoutput
         name: Terraform Output
         run: |
-          IotHubConnectionString=$(terraform output -raw iot_hub_connectionstring)
+          IotHubConnectionString=$(terraform output -raw iot_hub_connection_string)
           EdgeDeviceName=$(terraform output -raw edge_device_name)
           IotHubName=$(terraform output -raw iot_hub_name)
 

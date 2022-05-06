@@ -14,7 +14,7 @@ output "est_password" {
   value = var.auth_mode == "Basic" ? module.appservice.est_password : "Not set since user selected certificate authentication"
 }
 
-output "iot_hub_connectionstring" {
+output "iot_hub_connection_string" {
   value     = join(";", ["HostName=${module.iot_hub_dps.iot_hub_host_name}", "SharedAccessKeyName=${module.iot_hub_dps.iot_hub_key_name}", "SharedAccessKey=${module.iot_hub_dps.iot_hub_primary_key}"])
   sensitive = true
 }
