@@ -68,7 +68,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: ./DeviceProvisioningE2ETest
+        working-directory: ./E2ETests
 
     steps:
       - uses: actions/checkout@v3

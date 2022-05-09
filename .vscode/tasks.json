@@ -20,7 +20,7 @@
             "label": "test",
             "command": "dotnet",
             "type": "shell",
-            "args": ["test", "${workspaceFolder}/DeviceProvisioningE2ETest/E2ETests.csproj"],
+            "args": ["test", "${workspaceFolder}/E2ETests/E2ETests.csproj"],
             "group": {
                 "kind": "test",
                 "isDefault": true

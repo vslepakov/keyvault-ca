@@ -4,7 +4,7 @@ using NUnit.Framework;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace DeviceProvisioningE2ETest
+namespace E2ETests
 {
     public class DeviceProvisioningTests
     {

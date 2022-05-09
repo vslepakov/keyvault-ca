@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KeyVaultCa.Core", "KeyVault
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KeyVaultCA.Web", "KeyVaultCA.Web\KeyVaultCA.Web.csproj", "{76C9D81E-AC47-4BB8-8577-C94F2C5286D9}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "E2ETests", "..\testvscodelaunch\keyvault-ca\DeviceProvisioningE2ETest\E2ETests.csproj", "{5D865CA8-9D52-446F-BABD-C5FF5F084113}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "E2ETests", "E2ETests\E2ETests.csproj", "{5D865CA8-9D52-446F-BABD-C5FF5F084113}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
