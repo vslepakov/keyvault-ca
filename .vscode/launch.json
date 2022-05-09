@@ -24,17 +24,6 @@
             "stopAtEntry": false
         },
         {
-            "name": ".NET Core Launch E2ETest",
-            "type": "coreclr",
-            "request": "launch",
-            "preLaunchTask": "build",
-            "program": "${workspaceFolder}/DeviceProvisioningE2ETest/bin/Debug/net6.0/E2ETests.dll",
-            "args": [],
-            "cwd": "${workspaceFolder}/DeviceProvisioningE2ETest",
-            "console": "internalConsole",
-            "stopAtEntry": false
-        },
-        {
             "name": ".NET Core Attach",
             "type": "coreclr",
             "request": "attach"
