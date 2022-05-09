@@ -8,7 +8,7 @@ namespace E2ETests
 {
     public class DeviceProvisioningTests
     {
-        IConfiguration configuration;
+        IConfiguration? configuration;
 
         [SetUp]
         public void Setup()
