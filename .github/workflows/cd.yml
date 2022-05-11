@@ -20,7 +20,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Ensure directory permissions
-        run: sudo -s
+        run: sudo chown -R $(id -u) /home/runner/.azure
         
       - name: Azure Login
         run: az login --service-principal -u $ARM_CLIENT_ID -p $ARM_CLIENT_SECRET --tenant $ARM_TENANT_ID
