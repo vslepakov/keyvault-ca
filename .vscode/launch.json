@@ -1,0 +1,32 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": ".NET Core Launch KeyVaultCA",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/KeyVaultCA/bin/Debug/net6.0/KeyVaultCA.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/KeyVaultCA",
+            "console": "internalConsole",
+            "stopAtEntry": false
+        },
+        {
+            "name": ".NET Core Launch KeyVaultCA.Web",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/KeyVaultCA.Web/bin/Debug/net6.0/KeyVaultCA.Web.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/KeyVaultCA.Web",
+            "console": "internalConsole",
+            "stopAtEntry": false
+        },
+        {
+            "name": ".NET Core Attach",
+            "type": "coreclr",
+            "request": "attach"
+        }
+    ]
+}

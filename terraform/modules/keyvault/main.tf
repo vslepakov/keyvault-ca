@@ -47,7 +47,7 @@ resource "null_resource" "run_api_facade" {
 
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
-    working_dir = "${path.root}/../KeyvaultCA"
+    working_dir = "${path.root}/../KeyVaultCA"
     when        = create
     command     = <<EOF
       set -Eeuo pipefail

@@ -1,0 +1,92 @@
+name: CD
+on: 
+  workflow_dispatch:
+
+jobs:
+  terraform:
+    name: 'Setup Azure Infrastructure'
+    runs-on: ubuntu-latest
+    env:
+      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+
+    defaults:
+      run:
+        working-directory: ./terraform
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Ensure directory permissions
+        run: sudo -s
+        
+      - name: Azure Login
+        run: az login --service-principal -u $ARM_CLIENT_ID -p $ARM_CLIENT_SECRET --tenant $ARM_TENANT_ID
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          # This wrapper must be disabled in order to correctly capture output from terraform CLI into a bash var
+          # See https://github.com/hashicorp/setup-terraform/issues/20
+          terraform_wrapper: false
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Plan
+        run: terraform plan
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
+
+      - id: tfoutput
+        name: Terraform Output
+        run: |
+          IotHubConnectionString=$(terraform output -raw iot_hub_connection_string)
+          EdgeDeviceName=$(terraform output -raw edge_device_name)
+          IotHubName=$(terraform output -raw iot_hub_name)
+
+          echo "::set-output name=IotHubConnectionString::$IotHubConnectionString"
+          echo "::set-output name=EdgeDeviceName::$EdgeDeviceName"
+          echo "::set-output name=IotHubName::$IotHubName"
+    outputs:
+      IotHubConnectionString: ${{ steps.tfoutput.outputs.IotHubConnectionString }}
+      EdgeDeviceName: ${{ steps.tfoutput.outputs.EdgeDeviceName }}
+      IotHubName: ${{ steps.tfoutput.outputs.IotHubName }}
+
+  e2etest:
+    name: 'Run E2E Test'
+    runs-on: ubuntu-latest
+    needs: terraform
+    env:
+      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      IotHubConnectionString: ${{ needs.terraform.outputs.IotHubConnectionString}}
+      EdgeDeviceName: ${{ needs.terraform.outputs.EdgeDeviceName}}
+      IotHubName: ${{ needs.terraform.outputs.IotHubName}}
+
+    defaults:
+      run:
+        working-directory: ./E2ETests
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Mask IoT Hub Connection String
+        run: echo "::add-mask::$IotHubConnectionString"
+
+      - name: Enable public network access for IoT Hub
+        run: |
+          az login --service-principal -u $ARM_CLIENT_ID -p $ARM_CLIENT_SECRET --tenant $ARM_TENANT_ID
+          az extension add --name azure-iot
+          az iot hub update --name $IotHubName --set properties.publicNetworkAccess=Enabled
+
+      - name: Run E2E Test
+        run: dotnet test -e IotHubConnectionString=$IotHubConnectionString -e EdgeDeviceName=$EdgeDeviceName
+
+      - name: Disable public network access for IoT Hub
+        run: az iot hub update --name $IotHubName --set properties.publicNetworkAccess=Disabled

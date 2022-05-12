@@ -4,11 +4,11 @@ using NUnit.Framework;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace DeviceProvisioningE2ETest
+namespace E2ETests
 {
     public class DeviceProvisioningTests
     {
-        IConfiguration configuration;
+        IConfiguration? configuration;
 
         [SetUp]
         public void Setup()
@@ -24,8 +24,8 @@ namespace DeviceProvisioningE2ETest
         public async Task EdgeDeviceIsProvisionedAsync()
         {
             // Arrange
-            var iotHubConnectionString = configuration.GetSection("IotHubConnectionString").Value;
-            var targetDevice = configuration.GetSection("EdgeDeviceName").Value;
+            var iotHubConnectionString = configuration?.GetSection("IotHubConnectionString").Value;
+            var targetDevice = configuration?.GetSection("EdgeDeviceName").Value;
             var registryManager = RegistryManager.CreateFromConnectionString(iotHubConnectionString);
 
             // Act

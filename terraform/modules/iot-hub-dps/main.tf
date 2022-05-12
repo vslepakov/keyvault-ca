@@ -87,9 +87,5 @@ resource "null_resource" "dps_rootca_enroll" {
     command     = "rm -f ${self.triggers.cer}"
   }
 
-  provisioner "local-exec" {
-    command = "az iot dps update  --name ${azurerm_iothub_dps.iot_dps.name} --resource-group ${var.resource_group_name} --set properties.publicNetworkAccess=Disabled"
-  }
-
   depends_on = [azurerm_iothub_dps.iot_dps, var.run_api_facade_null_resource_id]
 }

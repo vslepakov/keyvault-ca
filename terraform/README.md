@@ -20,6 +20,7 @@ If the user wants to deploy the infrastructure without using private endpoints, 
       global_endpoint= "https://global.azure-devices-provisioning.net"
       #global_endpoint= "https://${DPS_NAME}.azure-devices-provisioning.net"
 ```
+And finally, set the `public_network_access_enabled` flag as part of the IoT Hub resource creation, inside `terraform/modules/iot-hub-dps/main.tf`, to `true` instead of `false`. If there is a need to SSH into the Virtual Machine, you could enable just-in-time access or open Port 22 as it is closed per default in this setup.
 
 ### Authenticating to the EST server using certificates
 The authentication mode is currently set to be `x509`, which means using certificates for authenticating to the EST server.
@@ -33,4 +34,16 @@ If you want to use `Basic` authentication with username and password, then you w
       
       #identity_cert = "file:///etc/aziot/estauth.pem"
       #identity_pk = "file:///etc/aziot/estauth.key.pem"
+```
+
+### Set up and run CD pipeline
+A CD Pipeline to deploy the infrastructure and run an end-to-end test using GitHub Actions can be found inside the `.github/workflows` directory. In order to run this pipeline successfully, you would first need to [create a Service Principal](https://docs.microsoft.com/en-us/azure/developer/terraform/authenticate-to-azure?tabs=bash#create-a-service-principal) using the Azure CLI with [Owner](https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#owner) rights (including the ability to assign roles in Azure RBAC). Make a note of the `appId`, `password`, and `tenant` values which are returned as a result of this creation.
+
+After that, you'll need to fork the repository and add these values individually as [repository secrets](https://github.com/Azure/actions-workflow-samples/blob/master/assets/create-secrets-for-GitHub-workflows.md) using the following secret names:
+
+```
+      AZURE_CLIENT_ID = <Your appId>
+      AZURE_CLIENT_SECRET = <Your password>
+      AZURE_SUBSCRIPTION_ID = <Your subscription id>
+      AZURE_TENANT_ID = <Your tenant>
 ```
